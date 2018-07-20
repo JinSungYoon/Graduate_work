@@ -142,13 +142,183 @@ X=6,5,4,7,3,5
 각 자료 값에서 자료의 평균값을 뺀 나머지를 제곱한 값을 모두 더한 값의 평균은 다음과 같이 구한다
 (6−5)2+(5−5)2+(4−5)2+(7−5)2+(3−5)2+(5−5)26
 이 자료의 분산을 구하는 코드를 작성한다."""
-X=6,5,4,7,3,5
-avg=0
-var=0
-for loop in range(len(X)):
-    avg+=X[loop]
-avg/=len(X)
-for loop in range(len(X)):
-    var+=(X[loop]-avg)**2
-var=var/len(X)
-print("average is {}\nvariance is {}".format(avg,var))
+#X=6,5,4,7,3,5
+#avg=0
+#var=0
+#for loop in range(len(X)):
+#    avg+=X[loop]
+#avg/=len(X)
+#for loop in range(len(X)):
+#    var+=(X[loop]-avg)**2
+#var=var/len(X)
+#print("average is {}\nvariance is {}".format(avg,var))
+"""파이썬 객체지향 프로그래밍"""
+#h=10
+#v=20
+#def area(h,v):
+#    return h*v
+#a=area(h,v)
+#print(a)
+"""클래스를 활용하여 객체지향 코딩 예시"""
+#class Rectangle(object):
+#    def __init__(self,h,v):
+#        self.h=h
+#        self.v=v
+#        
+#    def area(self):
+#        return self.h*self.v
+#r=Rectangle(10,20)
+#w=r.area()
+#print(w)
+"""연습문제1
+삼각형의 넓이를 계산하기 위한 클래스를 만든다. 이 클래스는 다음과 같은 속성을 가진다.
+밑변의 길이 b 와 높이 h
+삼각형의 넓이를 계산하는 메서드 area
+"""
+#class triangle(object):
+#    def __init__(self,h,b):
+#        self.h=h
+#        self.b=b
+#    def area(self):
+#        return (self.h*self.b)/2
+#    
+#t=triangle(14,7)
+#test=t.area()
+#print(test)
+"""연습문제2
+사각 기둥의 부피를 계산하기 위한 클래스를 만든다.
+이 클래스는 다음과 같은 속성을 가진다.
+밑면의 가로 길이 a, 밑면의 세로 길이 b, 높이 h
+부피를 계산하는 메서드 volume
+겉넓이를 계산하는 메서드 surface
+"""
+#class figure(object):
+#    def __init__(self,a,b,h):
+#        self.h=h
+#        self.a=a
+#        self.b=b
+#    def volume(self):
+#        return self.a*self.b*self.h
+#
+#pillar=figure(3,5,8)
+#volume=pillar.volume()
+#print(volume)    
+#class Character(object):
+#    def __init__(self):
+#        self.life=1000
+#        
+#    def attacked(self):
+#        self.life -=10
+#        print(u"{}의 데미지! 생명력:{}".format(10,self.life))
+#    def attack(self):
+#        print(u"공격!")
+#        
+#ace=Character()
+#bob=Character()
+#candy=Character()
+#print("세명의 플레이어의 생명력은 \nace:{} bob:{} candy:{}\n입니다.".format(ace.life,bob.life,candy.life))
+#ace.attacked()
+#bob.attacked()
+#candy.attacked()
+#ace.attacked()
+#bob.attacked()
+#bob.attacked()
+#ace.attacked()
+#print("세명의 플레이어의 생명력은 \nace:{} bob:{} candy:{}\n입니다.".format(ace.life,bob.life,candy.life))
+"""클래스 상속"""
+#class Warrior(Character):
+#    def __init__(self):
+#        super(Warrior,self).__init__()
+#        self.strength=15
+#        self.intelligence=5
+#    def attacked(self):
+#        self.life-=5
+#        print("{}의 데미지! 생명력:{}".format(5,self.life))
+#    def attack(self):
+#        print(u"육탄 공격!")
+#class Wizard(Character):
+#    def __init__(self):
+#        super(Wizard,self).__init__()
+#        self.strength=5
+#        self.intelligence=15
+#    def attacked(self):
+#        self.life-=15
+#        print("{}의 데미지! 생명력:{}".format(15,self.life))
+#    def attack(self):
+#        print(u"마법공격!")
+#david=Warrior()
+#elice=Wizard()
+#print("David의 생명력은 {}\t 힘은 {}\t 지력은 {}이고,\n elice의 생명력은 {}\t 힘은 {}\t 지력은{}입니다.".format(david.life,david.strength,david.intelligence,elice.life,elice.strength,elice.intelligence))
+#ace.attack()
+#david.attack()
+#elice.attack()
+#ace.attacked()
+#david.attacked()
+#elice.attacked()
+"""연습문제4
+다음과 같이 자동차를 나타내는 Car 클래스를 구현한다.
+이 클래스는 최고 속도를 의미하는 max_speed라는 속성과 현재 속도를 나타내는 speed라는 속성을 가진다.
+객체 생성시 max_speed 속성은 160이 되고 speed 속성은 0이 된다.
+speed_up, speed_down이라는 메서드를 가진다. speed_up을 호출하면 speed 속성이 20씩 증가하고 speed_down을 호출하면 speed 속성이 20씩 감소한다.
+스피드 속성 speed의 값은 max_speed 속성 값, 즉 160을 넘을 수 없다. 또 0 미만으로 감소할 수도 없다.
+메서드는 호출시 속도 정보를 출력하고 명시적인 반환값을 가지지 않는다.
+위 기능이 모두 정상적으로 구현되었음을 보이는 코드를 추가한다.
+"""
+#class Car(object):
+#    def __init__(self):
+#        self.max_speed=160
+#        self.speed=0
+#    def speed_up(self):
+#        if(self.speed+20<=self.max_speed):
+#            self.speed+=20
+#            print("속도 20증가!")
+#        else:
+#            print("더 이상 속도를 낼 수 없습니다.")
+#    def speed_down(self):
+#        if(self.speed-20>-1):
+#            self.speed-=20
+#            print("속도 20감속...")
+#        else:
+#            print("더이상 감속할 수 없습니다.")
+#    def state(self):
+#        print("현재 속도는 {}입니다.".format(self.speed))
+#audi=Car()
+#for i in range(9):
+#    audi.speed_up()
+#    audi.state()
+#for j in range(9):
+#    audi.speed_down()
+#    audi.state()
+"""문자열 인코딩"""
+"""파이썬 뿐 아니라 모든 컴퓨터에서 문자는 2진 숫자의 열 즉, 바이트 열(byte sequence)로 바뀌어 저장된다. 이를 인코딩(encoding)이라고 하며 어떤 글자를 어떤 숫자로 바꿀지에 대한 규칙을 인코딩 방식이라고 한다.
+가장 기본이 되는 인코딩 방식은 아스키(ASCII) 방식이다.
+한글의 경우 과거에는 EUC-KR 방식이 많이 사용되기도 했으나 최근에는 CP949 방식이 더 많이 사용된다."""
+#u="가"
+#print(len(u))
+#b=bytearray("가",'cp949')
+#print(len(b))
+#u1="ABC"
+#u2="가나다"
+#print(len(u1),len(u2))
+#print(u1[0],u1[1],u1[2])
+#print(u2[0],u2[1],u2[2])
+#바이트 열이면 글자를 한글자씩 분리할 수 없다.
+#b1=bytearray("ABC",'cp949')
+#b2=bytearray("가나다",'cp949')
+#print(len(b1),len(b2))
+#print(chr(b1[0]),chr(b1[1]),chr(b1[2]))
+#print(chr(b2[0]),chr(b2[1]),chr(b2[2]))
+u="가나다"
+print(type(u))
+b1=u.encode("cp949")
+print(type(b1))
+print(b1)
+b2=u.encode("euc-kr")
+print(type(b2))
+print(b2)
+b3=u.encode("utf-8")
+print(type(b3))
+print(b3)
+print(b1.decode("cp949"))
+print(b2.decode("euc-kr"))
+print(b3.decode("utf-8"))
