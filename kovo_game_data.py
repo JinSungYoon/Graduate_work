@@ -1,11 +1,14 @@
 # vollyball match data crawling file
+# reference
+# <https://beomi.github.io/gb-crawling/posts/2017-01-20-HowToMakeWebCrawler.html>
+# https://stackoverflow.com/questions/38028384/beautifulsoup-is-there-a-difference-between-find-and-select-python-3-x
 
 import requests
 import re
 from bs4 import BeautifulSoup
 import pandas as pd
 
-
+"""
 # Create the table element
 
 date=[] # 0번 인덱스
@@ -66,25 +69,254 @@ match = pd.DataFrame({
             index=date
         )       
 
-
-"""
-# 경기별 상세 기록 긁어오는 중....
-html=requests.get('http://www.kovo.co.kr/game/v-league/11141_game-summary.asp?season=014&g_part=201&r_round=1&g_num=1&')
-
-text=html.text
-
-box = BeautifulSoup(text,'html.parser')
-
-data = box.select('a')
-#for loop in data:
-#    print(loop.text)
-#print(data)
-
-#div>div[class=wrp_record wrp_precord]>table[class=lst_board lst_fixed w123]>tbody>td
-
-
-#tab2 > div > div.wrp_lst > table.lst_board.lst_fixed.w123 > tbody > tr:nth-child(1) > td:nth-child(2) > a
-
-
 #match.to_csv("match_data.csv",mode='w',encoding='EUC-KR')
+
 """
+
+# 경기별 상세 기록 긁어오는 중....
+
+# 경기 상세 기록 데이터가 있는 사이트 HTML데이터 긁어오기
+game_data=requests.get('http://www.kovo.co.kr/game/v-league/11141_game-summary.asp?season=014&g_part=201&r_round=1&g_num=1&')
+
+# 경기 상세 기록 데이터 사이트 HTML정보 text화
+text=game_data.text
+
+# text데이터 BeautifulSoup로 넣음
+dish=BeautifulSoup(text,'html.parser')
+
+#print(len(dish.select('table')))
+#print(len(dish.find_all('table')))
+
+#5번은 현대캐피탈 선수 리스트
+#6번은 경기기록 1번 테이블
+#7번은 경기기록 2번 테이블
+#8번은 경기기록 3번 테이블
+#9번은 경기기록 4번 테이블
+
+#10번은 대한항공 선수 리스트
+#11번은 경기기록 1번 테이블
+#12번은 경기기록 2번 테이블
+#13번은 경기기록 3번 테이블
+#14번은 경긱기록 4번 테이블
+
+
+# 이름 정리 완료!!!
+# name에 이름이 있는 태그 데이터 텍스트화해서 넣기
+Home_name=dish.select('table')[5].text
+Away_name=dish.select('table')[10].text
+
+# 공백 제거
+Home_name=Home_name.strip()
+Away_name=Away_name.strip()
+
+# 개행문자 기준으로 나눠서 리스트화
+Home_name=Home_name.splitlines()
+Away_name=Away_name.splitlines()
+
+#  ''라는 쓰래기 문자들이 있어서 제거하는 과정
+Home_num=Home_name.count( '')
+Away_num=Away_name.count( '')
+#print(Home_num)
+#print(Away_num)
+
+# 문자 아닌것만 리스트에 다시 정리
+for loop in range(0,Home_num):
+    Home_name.remove( '')
+for loop in range(0,Away_num):
+    Away_name.remove( '')
+
+#print(Home_name)
+#print(Away_name)
+
+Hback_num=[]
+Hname=[]
+Aback_num=[]
+Aname=[]
+
+for loop in range(3,len(Home_name)):
+    if loop%2==1:
+        Hback_num.append(Home_name[loop])
+    else:
+        Hname.append(Home_name[loop])
+        
+for loop in range(3,len(Away_name)):
+    if loop%2==1:
+        Aback_num.append(Away_name[loop])
+    else:
+        Aname.append(Away_name[loop])        
+
+#print(Hback_num)    
+#print(Hname)
+
+#print(Aback_num)
+#print(Aname)
+
+
+"""        
+# 경기 데이터 정리하기
+
+#1번 차트
+Hchart_1=dish.select('table')[6].text
+Achart_1=dish.select('table')[11].text    
+
+# 띄어쓰기 없애기
+Hchart_1=Hchart_1.strip()
+Achart_1=Achart_1.strip()
+
+# 개행단위로 나눠서 리스트화 하기
+Hchart_1=Hchart_1.splitlines()
+Achart_1=Achart_1.splitlines()
+
+Hgar=Hchart_1.count( '')
+Agar=Achart_1.count( '')
+
+for loop in range(0,Hgar):
+    Hchart_1.remove( '')
+for loop in range(0,Agar):
+    Achart_1.remove( '')
+
+# 데이터가 들어갈 테이블 생성
+Htable=[[] for i in range(14)]
+Atable=[[] for i in range(12)]
+
+#print(len(Hchart_1))
+# 총계 : 289 / 목차 23개 / 선수 14명 * 항목 18개 = 252
+#print(len(Achart_1))
+# 총계 : 251 / 목차 23개 / 선수 12명 * 항목 18개 = 216
+
+# 각 팀의 목차
+Hindex=Hchart_1[5:23]
+Hindex.insert(0,Hchart_1[1])
+Aindex=Achart_1[5:23]
+Aindex.insert(0,Achart_1[1])
+
+# 목차는 제외하고 넣어야 하기 때문에
+point=23
+# Home팀의 경기 데이터를 Htable에 넣는다
+for num in range(14):
+    if num!=0:
+        point+=19
+    for index in range(19):
+            Htable[num].append(Hchart_1[point+index])
+point=23
+# Away팀의 경기 데이터를 Atable에 넣는다.
+for num in range(12):
+    if num!=0:
+        point+=19
+    for index in range(19):
+            Atable[num].append(Achart_1[point+index])
+
+#print(Htable)            
+#print(Atable)
+
+# 경기데이터와 인덱스를 합쳐서 데이터 프레임을 만든다.
+Hframe=pd.DataFrame(Htable,columns=Hindex)
+Aframe=pd.DataFrame(Atable,columns=Aindex)
+
+#print(Hframe)
+#print(Aframe)
+"""
+# 1~4번 테이블 데이터            
+
+# 데이터가 들어갈 테이블 생성
+Htable=[[] for i in range(14)]
+Atable=[[] for i in range(12)]
+Hindex=[]
+Aindex=[]
+
+for page in range(6,10):
+    Hchart_4=dish.select('table')[page].text
+    Achart_4=dish.select('table')[page+5].text    
+    
+    # 띄어쓰기 없애기
+    Hchart_4=Hchart_4.strip()
+    Achart_4=Achart_4.strip()
+    
+    # 개행단위로 나눠서 리스트화 하기
+    Hchart_4=Hchart_4.splitlines()
+    Achart_4=Achart_4.splitlines()
+    
+    Hgar=Hchart_4.count( '')
+    Agar=Achart_4.count( '')
+    
+    for loop in range(0,Hgar):
+        Hchart_4.remove( '')
+    for loop in range(0,Agar):
+        Achart_4.remove( '')
+    
+    #print(len(Hchart_4))
+    # 1페이지
+    # 목차 23개 / 선수 14/12명 * 항목 19개 
+    # 2페이지
+    # 목차 22개 / 선수 14/12명 * 항목 18개
+    # 3페이지
+    # 목차 21개 / 선수 14/12명 * 항목 17개
+    # 4페이지
+    # 목차 24개 / 선수 14/12명 * 항목 20개
+
+#    1번 테이블 항목(19) / 2번 테이블 항목(18) / 3번 테이블 항목(17) / 4번 테이블 항목(20)
+    if page==6:
+#        print(Hchart_4[1:23])
+         item=len(Hchart_4[1:23])  # 22
+    elif page==7:
+#        print(Hchart_4[1:22])
+         item=len(Hchart_4[1:22])   # 21
+    elif page==8:
+#        print(Hchart_4[1:21])
+         item=len(Hchart_4[1:21])   # 20
+    elif page==9:
+#        print(Hchart_4[1:24])
+         item=len(Hchart_4[1:24])   # 23
+    
+    # 각 팀의 목차
+    if page==6:
+        hindex=Hchart_4[5:23]
+        hindex.insert(0,Hchart_4[1])
+        aindex=Achart_4[5:23]
+        aindex.insert(0,Achart_4[1])
+    elif page==7:
+        hindex=Hchart_4[4:22]
+        aindex=Achart_4[4:22]
+    elif page==8:
+        hindex=Hchart_4[4:21]
+        aindex=Achart_4[4:21]
+    elif page==9:
+        # 안타깝게도 벌칙 범실이 앞에 나와있어서 다시 뒤로 보내줘야 합니다.......
+        hindex=Hchart_4[6:24]
+        hindex.append(Hchart_4[4])
+        hindex.append(Hchart_4[5])
+        aindex=Achart_4[6:24]
+        aindex.append(Achart_4[4])
+        aindex.append(Achart_4[5])
+    #    print(hindex)
+    
+    # 목차는 제외하고 넣어야 하기 때문에
+    point=len(hindex)+4
+    
+    # Home팀의 경기 데이터를 Htable에 넣는다
+    for num in range(14):
+        if num!=0:
+            point+=item-3
+        for index in range(item-3):
+                Htable[num].append(Hchart_4[point+index])
+    point=len(aindex)+4
+    # Away팀의 경기 데이터를 Atable에 넣는다.
+    for num in range(12):
+        if num!=0:
+            point+=item-3
+        for index in range(item-3):
+                Atable[num].append(Achart_4[point+index])
+
+    # 인덱스들도 하나로 합쳐야 한다.
+    for loop in range(0,len(hindex)):
+        Hindex.append(hindex[loop])
+        Aindex.append(aindex[loop])
+#print(Hindex)
+#print(len(Hindex))
+    
+    # 경기데이터와 인덱스를 합쳐서 데이터 프레임을 만든다.
+    Hframe=pd.DataFrame(Htable,columns=Hindex,index=Hname)
+    Aframe=pd.DataFrame(Atable,columns=Aindex,index=Aname)
+
+#Hframe.to_csv("H_data.csv",mode='w',encoding='EUC-KR')
+#Aframe.to_csv("A_data.csv",mode='w',encoding='EUC-KR')
