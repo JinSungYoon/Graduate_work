@@ -8,7 +8,7 @@ import re
 from bs4 import BeautifulSoup
 import pandas as pd
 
-"""
+
 # Create the table element
 
 date=[] # 0번 인덱스
@@ -68,10 +68,11 @@ match = pd.DataFrame({
             columns=["Home","Away","Set_score","1st","2st","3st","4st","5st","result"],
             index=date
         )       
+match.index.name="Date"
+#print(match)
+match.to_csv("Season_result.csv",mode='w',encoding='EUC-KR')
 
-#match.to_csv("match_data.csv",mode='w',encoding='EUC-KR')
-
-"""
+#======================================================================
 
 # 경기별 상세 기록 긁어오는 중....
 
@@ -151,7 +152,7 @@ for loop in range(3,len(Away_name)):
 #print(Aback_num)
 #print(Aname)
 
-
+#===============================================================================
 """        
 # 경기 데이터 정리하기
 
@@ -216,11 +217,27 @@ Aframe=pd.DataFrame(Atable,columns=Aindex)
 #print(Hframe)
 #print(Aframe)
 """
+#================================================================================
+
 # 1~4번 테이블 데이터            
 
 # 데이터가 들어갈 테이블 생성
 Htable=[[] for i in range(14)]
 Atable=[[] for i in range(12)]
+# 홈경기의 작은 columns
+HSindex=[]
+# 어웨이경기의 작은 columns
+ASindex=[]
+# 홈경기의 큰 columns
+HBindex=[]
+# 어웨이경기의 큰 columns
+ABindex=[]
+
+# 인덱스 임시 저장소
+HTindex=[[],[]]
+ATindex=[[],[]]
+
+# 전체 다중 columns
 Hindex=[]
 Aindex=[]
 
@@ -270,17 +287,56 @@ for page in range(6,10):
     
     # 각 팀의 목차
     if page==6:
+        # 득점은 하나의 카테고리이기 때문에 넣어준다.
+        HTindex[0].append(Hchart_4[1])
+        ATindex[0].append(Achart_4[1])
+        # 공격종합 오픈 시간차는 6개의 항목이다.
+        for i in range(2,5):
+            for loop in range(0,6):
+                HTindex[0].append(Hchart_4[i])
+                ATindex[0].append(Achart_4[i])
         hindex=Hchart_4[5:23]
         hindex.insert(0,Hchart_4[1])
         aindex=Achart_4[5:23]
         aindex.insert(0,Achart_4[1])
     elif page==7:
+        # 이동 후위 속공은 6개의 항목이다.
+        for i in range(1,4):
+            for loop in range(0,6):
+                HTindex[0].append(Hchart_4[i])
+                ATindex[0].append(Hchart_4[i])
         hindex=Hchart_4[4:22]
         aindex=Achart_4[4:22]
     elif page==8:
+        for i in range(1,4):
+            # 서브의 해당 항목이 5개 이므로
+            if i==2:   
+                for loop in range(0,5):
+                    HTindex[0].append(Hchart_4[i])
+                    ATindex[0].append(Hchart_4[i])
+            #퀵 오픈, 디그의 항목이 6개 이므로
+            else:
+                for loop in range(0,6):
+                    HTindex[0].append(Hchart_4[i])
+                    ATindex[0].append(Hchart_4[i])
         hindex=Hchart_4[4:21]
         aindex=Achart_4[4:21]
     elif page==9:
+        for i in range(1,4):
+            # 블로킹은 해당 항목이 8개이므로
+            if i==3:
+                for loop in range(0,8):
+                    HTindex[0].append(Hchart_4[i])
+                    ATindex[0].append(Hchart_4[i])
+            # 세트와 리시브는 해당 항목이 5개 이므로
+            else:
+                for loop in range(0,5):
+                    HTindex[0].append(Hchart_4[i])
+                    ATindex[0].append(Hchart_4[i])
+        HTindex[0].append(Hchart_4[4])
+        HTindex[0].append(Hchart_4[5])
+        ATindex[0].append(Hchart_4[4])
+        ATindex[0].append(Hchart_4[5])
         # 안타깝게도 벌칙 범실이 앞에 나와있어서 다시 뒤로 보내줘야 합니다.......
         hindex=Hchart_4[6:24]
         hindex.append(Hchart_4[4])
@@ -288,8 +344,8 @@ for page in range(6,10):
         aindex=Achart_4[6:24]
         aindex.append(Achart_4[4])
         aindex.append(Achart_4[5])
-    #    print(hindex)
-    
+               
+
     # 목차는 제외하고 넣어야 하기 때문에
     point=len(hindex)+4
     
@@ -298,21 +354,23 @@ for page in range(6,10):
         if num!=0:
             point+=item-3
         for index in range(item-3):
-                Htable[num].append(Hchart_4[point+index])
+                Htable[num].append(float(Hchart_4[point+index]))
     point=len(aindex)+4
     # Away팀의 경기 데이터를 Atable에 넣는다.
     for num in range(12):
         if num!=0:
             point+=item-3
         for index in range(item-3):
-                Atable[num].append(Achart_4[point+index])
+                Atable[num].append(float(Achart_4[point+index]))
 
     # 인덱스들도 하나로 합쳐야 한다.
     for loop in range(0,len(hindex)):
-        Hindex.append(hindex[loop])
-        Aindex.append(aindex[loop])
-#print(Hindex)
-#print(len(Hindex))
+        HTindex[1].append(hindex[loop])
+        ATindex[1].append(aindex[loop])
+
+    Hindex=pd.MultiIndex.from_arrays(HTindex)    
+    Aindex=pd.MultiIndex.from_arrays(ATindex)    
+    
     
     # 경기데이터와 인덱스를 합쳐서 데이터 프레임을 만든다.
     Hframe=pd.DataFrame(Htable,columns=Hindex,index=Hname)
