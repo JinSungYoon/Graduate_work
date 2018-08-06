@@ -8,7 +8,7 @@ import re
 from bs4 import BeautifulSoup
 import pandas as pd
 
-
+"""
 # Create the table element
 
 date=[] # 0번 인덱스
@@ -71,10 +71,10 @@ match = pd.DataFrame({
 match.index.name="Date"
 #print(match)
 match.to_csv("Season_result.csv",mode='w',encoding='EUC-KR')
-
-#======================================================================
+"""
 
 # 경기별 상세 기록 긁어오는 중....
+#===========================선수들 이름 데이터 긁어오기===========================================
 
 # 경기 상세 기록 데이터가 있는 사이트 HTML데이터 긁어오기
 game_data=requests.get('http://www.kovo.co.kr/game/v-league/11141_game-summary.asp?season=014&g_part=201&r_round=1&g_num=1&')
@@ -99,7 +99,6 @@ dish=BeautifulSoup(text,'html.parser')
 #12번은 경기기록 2번 테이블
 #13번은 경기기록 3번 테이블
 #14번은 경긱기록 4번 테이블
-
 
 # 이름 정리 완료!!!
 # name에 이름이 있는 태그 데이터 텍스트화해서 넣기
@@ -152,9 +151,9 @@ for loop in range(3,len(Away_name)):
 #print(Aback_num)
 #print(Aname)
 
-#===============================================================================
+#==================================1번 차트 정리(경기 세부데이텨)=============================================
 """        
-# 경기 데이터 정리하기
+
 
 #1번 차트
 Hchart_1=dish.select('table')[6].text
@@ -217,9 +216,7 @@ Aframe=pd.DataFrame(Atable,columns=Aindex)
 #print(Hframe)
 #print(Aframe)
 """
-#================================================================================
-
-# 1~4번 테이블 데이터            
+#=========================================1~4번 테이블 데이터=======================================
 
 # 데이터가 들어갈 테이블 생성
 Htable=[[] for i in range(14)]
@@ -378,3 +375,32 @@ for page in range(6,10):
 
 #Hframe.to_csv("H_data.csv",mode='w',encoding='EUC-KR')
 #Aframe.to_csv("A_data.csv",mode='w',encoding='EUC-KR')
+
+#=============================================================================
+"""
+# 경기 문자기록 데이터 크롤링
+# 참고로 세트별로 다 있다 ㅎㅎㅎ 어떻게 긁을래 ㅋㅋㅋㅋ???
+message=requests.get('http://www.kovo.co.kr/media/popup_result.asp?season=014&g_part=201&r_round=1&g_num=1')
+
+m_text=message.text
+
+mashroom=BeautifulSoup(m_text,'html.parser')
+
+# 경기 실시간 문자중계 데이터 텍스트와
+M_data=mashroom.select("div[id=onair_lst]")[0].text
+
+# 개행문자 중심으로 분할
+onair_data=M_data.splitlines()
+# 띄어쓰기 문자들 갯수 파악
+blank_num=onair_data.count( '')
+# 이상한 문자 갯수 파악
+sp_ch=onair_data.count( '\xa0')
+# 띄어쓰기 문자들 제거
+for loop in range(0,blank_num):
+   if loop<526:
+    onair_data.remove( '')
+    onair_data.remove( '\xa0')
+   else:
+       onair_data.remove( '')
+print(onair_data)
+"""
