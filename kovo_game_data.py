@@ -7,6 +7,9 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
+# 리스트에스 각 요소의 갯수 셀때 쓰는 import
+from collections import Counter
 
 """
 # Create the table element
@@ -176,8 +179,8 @@ for loop in range(0,Agar):
     Achart_1.remove( '')
 
 # 데이터가 들어갈 테이블 생성
-Htable=[[] for i in range(14)]
-Atable=[[] for i in range(12)]
+Htable=[[] for i in range(len(Hname))]
+Atable=[[] for i in range(len(Aname))]
 
 #print(len(Hchart_1))
 # 총계 : 289 / 목차 23개 / 선수 14명 * 항목 18개 = 252
@@ -377,30 +380,142 @@ for page in range(6,10):
 #Aframe.to_csv("A_data.csv",mode='w',encoding='EUC-KR')
 
 #=============================================================================
-"""
-# 경기 문자기록 데이터 크롤링
-# 참고로 세트별로 다 있다 ㅎㅎㅎ 어떻게 긁을래 ㅋㅋㅋㅋ???
-message=requests.get('http://www.kovo.co.kr/media/popup_result.asp?season=014&g_part=201&r_round=1&g_num=1')
 
-m_text=message.text
+# 경기 생중계 문자기록 데이터 크롤링
 
-mashroom=BeautifulSoup(m_text,'html.parser')
+Set_success=[]
+Set_rate=[]
 
-# 경기 실시간 문자중계 데이터 텍스트와
-M_data=mashroom.select("div[id=onair_lst]")[0].text
-
-# 개행문자 중심으로 분할
-onair_data=M_data.splitlines()
-# 띄어쓰기 문자들 갯수 파악
-blank_num=onair_data.count( '')
-# 이상한 문자 갯수 파악
-sp_ch=onair_data.count( '\xa0')
-# 띄어쓰기 문자들 제거
-for loop in range(0,blank_num):
-   if loop<526:
-    onair_data.remove( '')
-    onair_data.remove( '\xa0')
-   else:
-       onair_data.remove( '')
-print(onair_data)
-"""
+# 최종
+# 한경기에 최소 3개에서 최대 5개의 경기가 있으므로 그 데이터를 다 긁어야 해서 5번 for 구문을 반복
+for page in range(1,6):
+    # 1세트 문자중계 데이터 크롤링 결과는 21:25 대한항공이 승리
+    On_air=requests.get('http://www.kovo.co.kr/media/popup_result.asp?season=014&g_part=201&r_round=1&g_num=1&r_set=%s'%(page))
+    
+    # 가져온 데이터를 텍스트와
+    On_text=On_air.text
+    
+    # 텍스트화한 정보를 BeautifulSoup로 처리
+    hot=BeautifulSoup(On_text,'html.parser')
+    
+    # HTML 데이터에서 경기 생중계 문자 기록 데이터만 On_message에 저장
+    On_message_text=hot.select("div[id=onair_lst]")[0].text
+    
+    # 경기 중계데이터 개행문자 기준으로 분할
+    On_message_text=On_message_text.splitlines()
+    
+    # 필요없는 데이터 제거작업
+    blank_num=On_message_text.count( '')
+    sp_ch=On_message_text.count( '\xa0')
+    
+    for i in range(0,blank_num):
+        if i<sp_ch:
+            On_message_text.remove( '')
+            On_message_text.remove( '\xa0')
+        else:
+            On_message_text.remove( '')
+    
+    # 각 단어 요소가 몇번씩 나왔는지 파악하는 함수
+    Counter(On_message_text)
+    
+    # 현대 캐피탈 선수들의 이름을 Sky_name에 저장
+    Sky_name=[]
+    for loop in range(0,len(Hname)):
+        Sky_name.append(Hname[loop][:-4])
+    
+    # 대한항공 선수들의 이름을 Jumbos_name에 저장
+    Jumbos_name=[]
+    for loop in range(0,len(Aname)):
+        Jumbos_name.append(Aname[loop][:-4])
+    
+    Sky_data=[[] for i in range(len(Sky_name))]
+    Jumbos_data=[[] for i in range(len(Jumbos_name))]
+    
+    # 현대캐피탈의 데이터만 긁어온 데이터
+    for i in range(0,len(On_message_text)):         # 생중계 데이터의 길이만큼
+        if len(On_message_text[i])>4:               # 팀득점, 팀실패, 경기포인트 등을 제외하고 출력하기 위해서
+            for loop in range(len(Sky_name)):      # 현대캐피탈 선수들의 이름이 한번씩 들어가기 위해서
+                if Sky_name[loop] in On_message_text[i]:   # 현대캐파틸 선수들의 이름이 들어간 텍스트 각 선수별로 Sky_data에 저장
+                    Sky_data[loop].append(On_message_text[i])
+    
+    # 대한항공의 데이터만 긁어온 데이터
+    for i in range(0,len(On_message_text)):         # 생중계 데이터의 길이만큼
+        if len(On_message_text[i])>4:               # 팀득점, 팀실패, 경기포인트 등을 제외하고 출력하기 위해서
+            for loop in range(len(Jumbos_name)):      # 대한항공 선수들의 이름이 한번씩 들어가기 위해서
+                if Jumbos_name[loop] in On_message_text[i]:   # 대한항공 선수들의 이름이 들어간 텍스트 각 선수별로 Jumbos_data에 저장
+                    Jumbos_data[loop].append(On_message_text[i])
+    
+    # 경기기록 종류 리스트
+    Scoring_items=[
+            '오픈','오픈 아웃','오픈 성공 득점',
+            '시간차',
+            '백어택','백어택 포히트','백어택 성공 득점',
+            '속공','속공 포히트','속공 성공 득점',
+            '퀵오픈 ','퀵오픈 성공 득점',
+            '서브 ','서브 라인오버','서브 네트걸림',
+            '스파이크서브 ','스파이크서브 아웃','스파이크서브 성공 득점','스파이크서브 네트걸림',
+            '디그 ','디그 실패','디그 캐치볼','디그 기타범실',
+            '세트 ','세트 성공','세트 오버네트',
+            '리시브 ','리시브 실패','리시브 정확',
+            '블로킹 ','블로킹 실패','블로킹 어시스트','블로킹 네트터치','유효블로킹 ','블로킹 성공 득점',
+            '교체','투입'
+            ]
+    # 경기기록 대분류
+    Scoring_sort=['오픈','시간차','백어택','속공','퀵오픈','서브','디그','세트','리시브','블로킹']
+    
+    # 팀별 성공,시도,성공률을 저장할 리스트 생성
+    Sky_success=np.zeros(len(Scoring_sort))
+    Jumbos_success=np.zeros(len(Scoring_sort))
+    Sky_try=np.zeros(len(Scoring_sort))
+    Jumbos_try=np.zeros(len(Scoring_sort))
+    Sky_rate=np.zeros(len(Scoring_sort))
+    Jumbos_rate=np.zeros(len(Scoring_sort))
+    
+    for index in range(0,len(Sky_data)):    # 현대캐피탈 생중계 메세지 경기 데이터
+        for item in range(len(Scoring_sort)):     # 경기기록 종류 
+            for record in range(len(Sky_data[index])):  # 선수별 데이터에서 돌도록
+                    if Scoring_sort[item] in Sky_data[index][record]:   # 선수별 데이터에서 경기기록 종류가 있다면
+                        if '성공' in Sky_data[index][record]:     # 그것이 '성공'을 포함하고 있다면
+                            Sky_success[item]+=1
+                        if '디그' in Sky_data[index][record]:     # 그것이 '디그'를 포함하고 있다면
+                            Sky_success[item]+=1
+                        if '정확' in Sky_data[index][record]:     # 그것이 '정확'을 포함하고 있다면
+                            Sky_success[item]+=1
+                        Sky_try[item]+=1
+    
+    for index in range(0,len(Jumbos_data)):     # 대한항공 생중계 메세지 경기 데이터
+        for item in range(len(Scoring_sort)):     #경기기록 종류 
+            for record in range(len(Jumbos_data[index])):   # 선수별 데이터에서 돌도록
+                    if Scoring_sort[item] in Jumbos_data[index][record]:    # 선수별 데이터에서 경기기록 종류가 있다면
+                        if '성공' in Jumbos_data[index][record]:  # 그것이 '성공'을 포함하고 있다면
+                            Jumbos_success[item]+=1
+                        if '디그' in Jumbos_data[index][record]:  # 그것이 '디그'를 포함하고 있다면
+                            Jumbos_success[item]+=1
+                        if '정확' in Jumbos_data[index][record]:  # 그것이 '정확'을 포함하고 있다면
+                            Jumbos_success[item]+=1
+                        Jumbos_try[item]+=1
+    
+    
+    # 오픈과 퀵오픈이 오픈이라는 공통단어를 가지고 있으므로 오픈에서 퀵오픈의 개수를 빼줘야 한다.
+    Sky_success[0]=Sky_success[0]-Sky_success[4]
+    Jumbos_success[0]=Jumbos_success[0]-Jumbos_success[4]
+    Sky_try[0]=Sky_try[0]-Sky_try[4]
+    Jumbos_try[0]=Jumbos_try[0]-Jumbos_try[4]
+    
+    # 각 항목별 성공률을 계산해서 팀명_rate에 저장합니다.
+    for loop in range(len(Scoring_sort)):
+        Sky_rate[loop]=Sky_success[loop]/Sky_try[loop]
+        Jumbos_rate[loop]=Jumbos_success[loop]/Jumbos_try[loop]
+    
+    # 세트별 각 항목의 성공률을 리스트화
+    Set_rate.append(Sky_rate)
+    Set_rate.append(Jumbos_rate)
+    
+    # 세트별 각 항목의 성공 갯수를 리스트화
+    Set_success.append(Sky_success)
+    Set_success.append(Jumbos_success)
+    
+#성공률 데이터 테이블화
+Rate_record=pd.DataFrame(Set_rate,columns=Scoring_sort,index=["sky","Jumbos"]*5)
+#성공횟수 데이터 테이블화
+Success_record=pd.DataFrame(Set_success,columns=Scoring_sort,index=["sky","Jumbos"]*5)

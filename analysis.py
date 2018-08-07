@@ -39,14 +39,15 @@ Season_result=Season_result.set_index("Date")
 
 # 한 시즌에서 한국전력의 경기만 불러오기 테이블명.query(해당열조건 |(or) &(and) 해당열조건)
 #print(Season_result.query("Home=='한국전력'|Away=='한국전력'"))
-
+"""
 #===================== 경기에서 각 항목별 성공비율이 경기의 승리와 연관이 있는지 성공비율을 비교해보고 그래프로 나타내자===============================
 #===================== 오늘 또 하나의 좋은 삽질을 했다 ㅎㅎㅎㅎㅎ==================================================================================
-"""
+
 # 경기에서 각 항목별 성공비율이 경기의 승리와 연관이 있는지 알아보자.
 
 Hframe=kovo.Hframe
 Aframe=kovo.Aframe
+
 HScore=Hframe["득점"].sum()
 AScore=Aframe["득점"].sum()
 HA=Hframe["공격종합"]["성공"].sum()/Hframe["공격종합"]["시도"].sum()
@@ -78,6 +79,7 @@ AE=Aframe["범실"].sum()
 #print("대한항공의 각 항목별 성공률\n 득점 : %2.2f / 공격종합 : %2.2f / 오픈 : %2.2f / 시간차 :%2.2f /\n 후위 : %2.2f / 속공 : %2.2f / 퀵오픈 : %2.2f / 서브 : %2.2f /\n 디그 : %2.2f / 세트 : %2.2f / 리시브 : %2.2f / 블로킹 : %2.2f / 범실 %d"%(AScore,AA,AO,AT,ARear,AQ,AQO,AServe,AD,ASet,AReceive,ABlock,AE))
 
 # 경기 관련 정보 그래프 그리기
+# https://matplotlib.org/examples/pylab_examples/barchart_demo.html 참조
 
 # 내가 표현하고 싶은 데이터
 Sky=[HA,HO,HT,HRear,HQ,HQO,HServe,HD,HSet,HReceive,HBlock]
@@ -104,8 +106,8 @@ Jumbos_graph=plt.bar(height+bar_width,Jumbos,bar_width,
                      color='b',         # 그래프 색깔
                      label='대한항공')
 # x,y축 그래프 이름 설정
-plt.xlabel=('각 항목')
-plt.ylabel=('성공률')
+plt.xlabel('각 항목')
+plt.ylabel('성공률')
 plt.title('두 팀의 항목별 성공률 비교')
 
 # x축 항목 이름 지정
@@ -115,6 +117,91 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 """
+#==============================================실시간 중계 데이터 분석===============================================================
+
+# 실시간 중계데이터에서 부문별 성공률 정리한 데이터 가져오기
+
+On_air_rate=kovo.Rate_record
+On_air_success=kovo.Success_record
+
+# 각 세트의 항목별 성공률 그래프화
+for set_num in range(4):
+    # 각 팀의 세트 데이터 가져오기
+    Sky_1st = On_air_rate.iloc[set_num]
+    Jumbos_1st = On_air_rate.iloc[set_num+1]
+        
+    fig,ax = plt.subplots()
+    
+    height = np.arange(len(Sky_1st))    # 그래프의 y축 높이
+    
+    bar_width = 0.4                     # 그래프의 너비
+    
+    opacity = 0.4                       #그래프의 불투명도
+    
+    Home_graph=plt.bar(height,Sky_1st,bar_width,
+                       alpha=opacity,
+                       color='#000000',
+                       label="현대캐피탈"
+                       )
+    
+    Away_graph=plt.bar(height+bar_width,Jumbos_1st,bar_width,
+                       alpha=opacity,
+                       color='#0000FF',
+                       label="대한항공"
+                       )
+    
+    # x,y축 그래프 이름 설정
+    plt.xlabel=('각 항목')
+    plt.ylabel=('성공률')
+    plt.title('%d세트 두 팀의 항목별 성공률 비교'%(set_num+1))
+    
+    # x축 항목 이름 지정
+    plt.xticks(height,kovo.Scoring_sort)
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+
+# 각 세트의 성공횟수 그래프 생성
+for set_num in range(4):
+    # 각 팀의 세트 데이터 가져오기
+    Sky_1st = On_air_success.iloc[set_num]
+    Jumbos_1st = On_air_success.iloc[set_num+1]
+        
+    fig,ax = plt.subplots()
+    
+    height = np.arange(len(Sky_1st))
+    
+    bar_width = 0.4
+    
+    opacity = 0.4
+    
+    # Home팀의 경기 그래프
+    Home_graph=plt.bar(height,Sky_1st,bar_width,
+                       alpha=opacity,
+                       color='r',
+                       label="현대캐피탈"
+                       )
+    
+    # Away팀의 경기 그래프
+    Away_graph=plt.bar(height+bar_width,Jumbos_1st,bar_width,
+                       alpha=opacity,
+                       color='g',
+                       label="대한항공"
+                       )
+    
+    # x,y축,그래프 이름 설정
+    plt.xlabel=('각 항목')
+    plt.ylabel=('성공횟수')
+    plt.title('%d세트 두 팀의 항목별 성공횟수 비교'%(set_num+1))
+    
+    # x축 항목 이름 지정
+    plt.xticks(height,kovo.Scoring_sort)
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+
 #=============================================================================================
 """
 fruit=pd.DataFrame({
