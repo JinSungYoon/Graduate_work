@@ -11,6 +11,115 @@ import numpy as np
 # 리스트에스 각 요소의 갯수 셀때 쓰는 import
 from collections import Counter
 
+# 5년치 남녀 시즌 순위 및 승점 승,패 세트 득실률 점수 득실률 크롤링
+
+MSeason = []
+FSeason = []
+
+for num in range(8,15):
+        # HTML데이터 긁어오기 - 부득이하게 하나의 페이지에 여자부 남자부 데이터가 없어서 남자 여자를 나눠야 했습니다.....
+        
+        # 남자부 시즌 경기 결과
+        if num<10:
+            MSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?s_part=1&season=00{}&g_part=201".format(str(num)))
+        else:
+            MSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?s_part=1&season=0{}&g_part=201".format(str(num)))        
+        
+        # 여자부 시즌 경기 결과
+        if num<10:
+            FSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?season=00{}&g_part=201&s_part=2".format(str(num)))
+        else:
+            FSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?season=0{}&g_part=201&s_part=2".format(str(num)))
+        
+        
+        # Season_result를 text화 해서 html의 정보를 텍스트로 가져오기
+        MSeason_text = MSeason_result_site.text
+        FSeason_text = FSeason_result_site.text
+        
+        # 텍스트로 가져온 데이터를 BeautifulSoup의 형태로 변환
+        MSeason_temp = BeautifulSoup(MSeason_text,'html.parser')
+        FSeason_temp = BeautifulSoup(FSeason_text,'html.parser')
+                
+        # 시즌 결과 테이블만 Result_table에 저장
+        MResult_table = MSeason_temp.select("table[class=lst_board]")[0].text
+        FResult_table = FSeason_temp.select("table[class=lst_board]")[0].text
+        
+        Mtemp = MResult_table.splitlines()
+        Ftemp = FResult_table.splitlines()
+        
+        # 데이터에서 불필요한 문자열 제거
+        Mblank = Mtemp.count( '')
+        Mtab = Mtemp.count('\t\t\t\t\t\t\t\t\t')
+        Fblank = Ftemp.count( '')
+        Ftab = Ftemp.count( '\t\t\t\t\t\t\t\t\t')
+        
+        for loop in range(Mblank):
+            if loop<Mtab:
+                Mtemp.remove( '')
+                Mtemp.remove('\t\t\t\t\t\t\t\t\t')
+            else:
+                Mtemp.remove( '')
+                
+        for loop in range(Fblank):
+            if loop<Ftab:
+                Ftemp.remove( '')
+                Ftemp.remove( '\t\t\t\t\t\t\t\t\t')
+            else:
+                Ftemp.remove( '')
+        
+       # 0번 : 테이블 설명 / 1번 : 순위 / 2번 : 팀 / 3번 :경기수 / 4번 : 승점 / 5번 : 승 / 6번 : 패 / 7번 : 세트득실률 / 8번 : 점수 득실률
+        
+        # 데이터 테이블 요소 생성
+        MResult_list = []
+        FResult_list = []
+        
+        # result_list에 columns값을 넣어놓는다.
+        for i in range(1,9):
+            MResult_list.append(Mtemp[i])
+        
+        MSeason_data = [[] for index in range(int(len(Mtemp)/9))]
+        
+        for i in range(1,9):
+            FResult_list.append(Ftemp[i])
+        
+        FSeason_data = [[] for index in range(int(len(Ftemp)/9))]
+        
+        # Season_data의 인덱스 번호
+        index=0
+        for loop in range(9,len(Mtemp),8):
+            MSeason_data[index].append(Mtemp[loop])
+            MSeason_data[index].append(Mtemp[loop+1])
+            MSeason_data[index].append(Mtemp[loop+2])
+            MSeason_data[index].append(Mtemp[loop+3])
+            MSeason_data[index].append(Mtemp[loop+4])
+            MSeason_data[index].append(Mtemp[loop+5])
+            MSeason_data[index].append(Mtemp[loop+6])
+            MSeason_data[index].append(Mtemp[loop+7])
+            index+=1
+        
+        index = 0
+        for loop in range(9,len(Ftemp),8):
+            FSeason_data[index].append(Ftemp[loop])
+            FSeason_data[index].append(Ftemp[loop+1])
+            FSeason_data[index].append(Ftemp[loop+2])
+            FSeason_data[index].append(Ftemp[loop+3])
+            FSeason_data[index].append(Ftemp[loop+4])
+            FSeason_data[index].append(Ftemp[loop+5])
+            FSeason_data[index].append(Ftemp[loop+6])
+            FSeason_data[index].append(Ftemp[loop+7])
+            index+=1
+
+        
+        # 경기 데이터를 Season_result라는 테이블로 만든다.
+        MSeason_result = pd.DataFrame(MSeason_data,columns=MResult_list)
+        FSeason_result = pd.DataFrame(FSeason_data,columns=FResult_list)
+        
+        # 테이블의 인덱스를 순위로 바꿔준다.
+        MSeason_result=MSeason_result.set_index("순위")
+        FSeason_result=FSeason_result.set_index("순위")
+        MSeason.append(MSeason_result)
+        FSeason.append(FSeason_result)
+
 """
 # Create the table element
 
@@ -22,40 +131,45 @@ First=[]  # 7번 인덱스
 Second=[]  # 8번 인덱스
 Third=[]  # 9번 인덱스
 Fourth=[]  # 10번 인덱스
-Fifth=[]  # 11번 인덱스
 result=[] # 12번 인덱스
 
-# Crawling the vollye_match_result9
+# ====================================================한 시즌 경기 결과 데이터==============================================
 
-for day in range(1,14):
+for page in range(1,20):
     # KOVO HTTP GET Request
-    kovo = requests.get('http://www.kovo.co.kr/stats/46101_previous-record.asp?s_part=1&spart=&t_code=&s_season=014&s_pr=201|1&e_season=014&e_pr=201|6&page={}'.format(str(day)))
-    
-    # HTML text화 하기
-    site = kovo.text
-    
-    # Beautifulsoup로 html 저장하기
-    pot = BeautifulSoup(site,'html.parser')
-    
-    # 경기 관련 테이블에 있는 내용 다 긁었어유 ㅎㅎㅎ
-    # soup.select("div[id=foo] > div > div > div[class=fee] > span > span > a") 쓰는 format
-    
-    # 내가 글어야 하는 데이터의 css 정보
-    #print(pot.select("article[id=tab1] > div[class=wrp_lst] > table > tbody > tr > td[class=border_left]"))
-    
-    table=pot.select("article[id=tab1] > div[class=wrp_lst] > table > tbody > tr > td")
+        kovo = requests.get('http://www.kovo.co.kr/stats/46101_previous-record.asp?s_part=1&spart=&t_code=&s_season=014&s_pr=201|1&e_season=014&e_pr=201|6&page={}'.format(str(page)))
         
-    for loop in range(0,len(table),13):
-        date.append(table[loop].text)
-        home.append(table[loop+1].text)
-        away.append(table[loop+5].text)
-        set_score.append(table[loop+6].text)
-        First.append(table[loop+7].text)
-        Second.append(table[loop+8].text)
-        Third.append(table[loop+9].text)
-        Fourth.append(table[loop+10].text)
-        Fifth.append(table[loop+11].text)
-        result.append(table[loop+12].text)
+        print("%s %s"%(page,kovo))
+    
+        # HTML text화 하기
+        site = kovo.text
+                
+        # Beautifulsoup로 html 저장하기
+        pot = BeautifulSoup(site,'html.parser')
+        
+        # 경기 관련 테이블에 있는 내용 다 긁었어유 ㅎㅎㅎ
+        # soup.select("div[id=foo] > div > div > div[class=fee] > span > span > a") 쓰는 format
+        
+        # 내가 글어야 하는 데이터의 css 정보
+        #print(pot.select("article[id=tab1] > div[class=wrp_lst] > table > tbody > tr > td[class=border_left]"))
+        
+        table=pot.select("article[id=tab1] > div[class=wrp_lst] > table > tbody > tr > td")
+        
+        # 해당 페이지를 초과했을때 빠져나올 수 있는 조건문
+        if len(table)<10:
+            break
+        
+        for loop in range(0,len(table),13):
+            date.append(table[loop].text)
+            home.append(table[loop+1].text)
+            away.append(table[loop+5].text)
+            set_score.append(table[loop+6].text)
+            First.append(table[loop+7].text)
+            Second.append(table[loop+8].text)
+            Third.append(table[loop+9].text)
+            Fourth.append(table[loop+10].text)
+            Fifth.append(table[loop+11].text)
+            result.append(table[loop+12].text)
 
 match = pd.DataFrame({
             'Home':home,
@@ -72,13 +186,14 @@ match = pd.DataFrame({
             index=date
         )       
 match.index.name="Date"
-#print(match)
-match.to_csv("Season_result.csv",mode='w',encoding='EUC-KR')
-"""
 
+print(match)
+
+#match.to_csv("Season_result.csv",mode='w',encoding='EUC-KR')
+"""
 # 경기별 상세 기록 긁어오는 중....
 #===========================선수들 이름 데이터 긁어오기===========================================
-
+"""
 # 경기 상세 기록 데이터가 있는 사이트 HTML데이터 긁어오기
 game_data=requests.get('http://www.kovo.co.kr/game/v-league/11141_game-summary.asp?season=014&g_part=201&r_round=1&g_num=1&')
 
@@ -153,7 +268,7 @@ for loop in range(3,len(Away_name)):
 
 #print(Aback_num)
 #print(Aname)
-
+"""
 #==================================1번 차트 정리(경기 세부데이텨)=============================================
 """        
 
@@ -220,7 +335,7 @@ Aframe=pd.DataFrame(Atable,columns=Aindex)
 #print(Aframe)
 """
 #=========================================1~4번 테이블 데이터=======================================
-
+"""
 # 데이터가 들어갈 테이블 생성
 Htable=[[] for i in range(14)]
 Atable=[[] for i in range(12)]
@@ -378,10 +493,9 @@ for page in range(6,10):
 
 #Hframe.to_csv("H_data.csv",mode='w',encoding='EUC-KR')
 #Aframe.to_csv("A_data.csv",mode='w',encoding='EUC-KR')
-
-#=============================================================================
-
-# 경기 생중계 문자기록 데이터 크롤링
+"""
+#================================경기 생중계 문자기록 데이터 크롤링=============================================
+"""
 
 Set_success=[]
 Set_rate=[]
@@ -519,3 +633,4 @@ for page in range(1,6):
 Rate_record=pd.DataFrame(Set_rate,columns=Scoring_sort,index=["sky","Jumbos"]*5)
 #성공횟수 데이터 테이블화
 Success_record=pd.DataFrame(Set_success,columns=Scoring_sort,index=["sky","Jumbos"]*5)
+"""

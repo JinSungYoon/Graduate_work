@@ -39,8 +39,51 @@ Season_result=Season_result.set_index("Date")
 
 # 한 시즌에서 한국전력의 경기만 불러오기 테이블명.query(해당열조건 |(or) &(and) 해당열조건)
 #print(Season_result.query("Home=='한국전력'|Away=='한국전력'"))
+
+# ==================================== 시즌 결과 데이터 5년치 ===========================================================
+
+MSeason=kovo.MSeason
+FSeason=kovo.FSeason
+
+Mavg = [ [] for i in range(5) ]
+Favg = [ [] for i in range(5) ]
+index = 0
+for i in range(len(MSeason)):
+#    if i<3:
+#        Mavg[index].append(float(MSeason[i].iloc[2:3]["승률"]))
+#        Favg[index].append(float(FSeason[i].iloc[2:3]["승률"]))
+    Mavg[index].append(float(MSeason[i].iloc[2:3]["승점"]))
+    Favg[index].append(float(FSeason[i].iloc[2:3]["승점"]))
+    Mavg[index+1].append(float(MSeason[i].iloc[2:3]["승"]))
+    Favg[index+1].append(float(FSeason[i].iloc[2:3]["승"]))
+    Mavg[index+2].append(float(MSeason[i].iloc[2:3]["패"]))
+    Favg[index+2].append(float(FSeason[i].iloc[2:3]["패"]))
+    Mavg[index+3].append(float(MSeason[i].iloc[2:3]["세트득실률"]))
+    Favg[index+3].append(float(FSeason[i].iloc[2:3]["세트득실률"]))
+    Mavg[index+4].append(float(MSeason[i].iloc[2:3]["점수득실률"]))
+    Favg[index+4].append(float(FSeason[i].iloc[2:3]["점수득실률"]))
+
+    
+def avg(line):
+    sum=0
+    for loop in range(len(line)):
+        sum+=line[loop]
+    return sum/len(line)
+
+
+
+print("남자부 3위 최대 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(max(Mavg[0]),max(Mavg[1]),max(Mavg[2]),max(Mavg[3]),max(Mavg[4])))
+print("남자부 3위 평균 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(avg(Mavg[0]),avg(Mavg[1]),avg(Mavg[2]),avg(Mavg[3]),avg(Mavg[4])))
+print("남자부 3위 최소 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(min(Mavg[0]),min(Mavg[1]),min(Mavg[2]),min(Mavg[3]),min(Mavg[4])))
+
+print('\n')
+
+print("여자부 3위 최대 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(max(Favg[0]),max(Favg[1]),max(Favg[2]),max(Favg[3]),max(Favg[4])))
+print("여자부 3위 평균 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(avg(Favg[0]),avg(Favg[1]),avg(Favg[2]),avg(Favg[3]),avg(Favg[4])))
+print("여자부 3위 최소 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(min(Favg[0]),min(Favg[1]),min(Favg[2]),min(Favg[3]),min(Favg[4])))
+
+#===================== 경기에서 각 항목별 성공비율이 경기의 승리와 연관이 있는지 성공비율을 비교(경기 세부데이터)===============================
 """
-#===================== 경기에서 각 항목별 성공비율이 경기의 승리와 연관이 있는지 성공비율을 비교해보고 그래프로 나타내자===============================
 #===================== 오늘 또 하나의 좋은 삽질을 했다 ㅎㅎㅎㅎㅎ==================================================================================
 
 # 경기에서 각 항목별 성공비율이 경기의 승리와 연관이 있는지 알아보자.
@@ -118,7 +161,7 @@ plt.tight_layout()
 plt.show()
 """
 #==============================================실시간 중계 데이터 분석===============================================================
-
+"""
 # 실시간 중계데이터에서 부문별 성공률 정리한 데이터 가져오기
 
 On_air_rate=kovo.Rate_record
@@ -201,8 +244,8 @@ for set_num in range(4):
     
     plt.tight_layout()
     plt.show()
-
-#=============================================================================================
+"""
+#=====================================연습 데이터========================================================
 """
 fruit=pd.DataFrame({
         '사과':np.random.randint(100,1000,size=10),
