@@ -12,9 +12,12 @@ import numpy as np
 from collections import Counter
 
 # 5년치 남녀 시즌 순위 및 승점 승,패 세트 득실률 점수 득실률 크롤링
-
+"""
 MSeason = []
 FSeason = []
+
+# 시즌 부문별 순위도 긁어야 된다고 생각해서 일단 만들어 놓았지만 html에 데이터가 없다..... 어떻게 찾아야 할 지 잘 모르겠다....
+MPart_table = [ [] for i in range(15)]
 
 for num in range(8,15):
         # HTML데이터 긁어오기 - 부득이하게 하나의 페이지에 여자부 남자부 데이터가 없어서 남자 여자를 나눠야 했습니다.....
@@ -24,13 +27,14 @@ for num in range(8,15):
             MSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?s_part=1&season=00{}&g_part=201".format(str(num)))
         else:
             MSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?s_part=1&season=0{}&g_part=201".format(str(num)))        
-        
+    
         # 여자부 시즌 경기 결과
         if num<10:
             FSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?season=00{}&g_part=201&s_part=2".format(str(num)))
         else:
             FSeason_result_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?season=0{}&g_part=201&s_part=2".format(str(num)))
         
+        temp_site = requests.get("http://www.kovo.co.kr/game/v-league/11210_team-ranking.asp?s_part=1&season=014&g_part=201#tab1_5")        
         
         # Season_result를 text화 해서 html의 정보를 텍스트로 가져오기
         MSeason_text = MSeason_result_site.text
@@ -39,14 +43,14 @@ for num in range(8,15):
         # 텍스트로 가져온 데이터를 BeautifulSoup의 형태로 변환
         MSeason_temp = BeautifulSoup(MSeason_text,'html.parser')
         FSeason_temp = BeautifulSoup(FSeason_text,'html.parser')
-                
+        
         # 시즌 결과 테이블만 Result_table에 저장
         MResult_table = MSeason_temp.select("table[class=lst_board]")[0].text
         FResult_table = FSeason_temp.select("table[class=lst_board]")[0].text
-        
+                
         Mtemp = MResult_table.splitlines()
         Ftemp = FResult_table.splitlines()
-        
+   
         # 데이터에서 불필요한 문자열 제거
         Mblank = Mtemp.count( '')
         Mtab = Mtemp.count('\t\t\t\t\t\t\t\t\t')
@@ -87,26 +91,26 @@ for num in range(8,15):
         # Season_data의 인덱스 번호
         index=0
         for loop in range(9,len(Mtemp),8):
-            MSeason_data[index].append(Mtemp[loop])
+            MSeason_data[index].append(int(Mtemp[loop]))
             MSeason_data[index].append(Mtemp[loop+1])
-            MSeason_data[index].append(Mtemp[loop+2])
-            MSeason_data[index].append(Mtemp[loop+3])
-            MSeason_data[index].append(Mtemp[loop+4])
-            MSeason_data[index].append(Mtemp[loop+5])
-            MSeason_data[index].append(Mtemp[loop+6])
-            MSeason_data[index].append(Mtemp[loop+7])
+            MSeason_data[index].append(int(Mtemp[loop+2]))
+            MSeason_data[index].append(int(Mtemp[loop+3]))
+            MSeason_data[index].append(int(Mtemp[loop+4]))
+            MSeason_data[index].append(int(Mtemp[loop+5]))
+            MSeason_data[index].append(float(Mtemp[loop+6]))
+            MSeason_data[index].append(float(Mtemp[loop+7]))
             index+=1
         
         index = 0
         for loop in range(9,len(Ftemp),8):
-            FSeason_data[index].append(Ftemp[loop])
+            FSeason_data[index].append(int(Ftemp[loop]))
             FSeason_data[index].append(Ftemp[loop+1])
-            FSeason_data[index].append(Ftemp[loop+2])
-            FSeason_data[index].append(Ftemp[loop+3])
-            FSeason_data[index].append(Ftemp[loop+4])
-            FSeason_data[index].append(Ftemp[loop+5])
-            FSeason_data[index].append(Ftemp[loop+6])
-            FSeason_data[index].append(Ftemp[loop+7])
+            FSeason_data[index].append(int(Ftemp[loop+2]))
+            FSeason_data[index].append(int(Ftemp[loop+3]))
+            FSeason_data[index].append(int(Ftemp[loop+4]))
+            FSeason_data[index].append(int(Ftemp[loop+5]))
+            FSeason_data[index].append(float(Ftemp[loop+6]))
+            FSeason_data[index].append(float(Ftemp[loop+7]))
             index+=1
 
         
@@ -115,11 +119,12 @@ for num in range(8,15):
         FSeason_result = pd.DataFrame(FSeason_data,columns=FResult_list)
         
         # 테이블의 인덱스를 순위로 바꿔준다.
-        MSeason_result=MSeason_result.set_index("순위")
-        FSeason_result=FSeason_result.set_index("순위")
+        MSeason_result=MSeason_result.set_index("팀")
+        FSeason_result=FSeason_result.set_index("팀")
         MSeason.append(MSeason_result)
         FSeason.append(FSeason_result)
-
+"""
+# ====================================================한 시즌 경기 결과 데이터==============================================
 """
 # Create the table element
 
@@ -132,8 +137,6 @@ Second=[]  # 8번 인덱스
 Third=[]  # 9번 인덱스
 Fourth=[]  # 10번 인덱스
 result=[] # 12번 인덱스
-
-# ====================================================한 시즌 경기 결과 데이터==============================================
 
 for page in range(1,20):
     # KOVO HTTP GET Request
@@ -482,7 +485,7 @@ for page in range(6,10):
     for loop in range(0,len(hindex)):
         HTindex[1].append(hindex[loop])
         ATindex[1].append(aindex[loop])
-
+    
     Hindex=pd.MultiIndex.from_arrays(HTindex)    
     Aindex=pd.MultiIndex.from_arrays(ATindex)    
     

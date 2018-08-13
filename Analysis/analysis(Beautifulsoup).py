@@ -21,7 +21,7 @@ import sys
 # 해당 파일을 불러오기 위해서 paht경로 지정하기
 sys.path.insert(0,'E:/대학교/졸업/졸업작품/웹크롤링/Webcrwaling and scraping using python')
 
-import kovo_game_data as kovo
+#import kovo_game_data as kovo
 
 # Pandas로 데이터 읽어오기
 # utf-8로 인코딩 된 파일 읽어오기
@@ -40,18 +40,56 @@ Season_result=Season_result.set_index("Date")
 # 한 시즌에서 한국전력의 경기만 불러오기 테이블명.query(해당열조건 |(or) &(and) 해당열조건)
 #print(Season_result.query("Home=='한국전력'|Away=='한국전력'"))
 
-# ==================================== 시즌 결과 데이터 5년치 ===========================================================
-
+# ==================================== 시즌 결과 데이터 7년치 ===========================================================
+"""
+# 시즌 7년 데이터 불러오기
+# 10년치 데이터를 긁어오려고 하였으나 2011년도부터 승점 제도가 도입되었고, 그에따른 플레이오프 진출 규정도 승점제도로 변경되어 7년전 데이터부터 긁어왔다.
 MSeason=kovo.MSeason
 FSeason=kovo.FSeason
+
+# 플레이오프에 진출여부에 대한 column을 하나 생성한다.
+# 플레이오프에 진출하기위한 조건은 남자,여자부 3위 이내 팀은 자동 진출이고 남자부의 경우에만 3위와 4위의 승점이 3점 이내일 경우 플레이오프에 진출한다.
+
+MPlay_off = [ [] for i in range(len(MSeason))]
+FPlay_off = [ [] for i in range(len(FSeason))]
+
+for year in range(len(MSeason)):
+    for rank in range(len(MSeason[year])):
+        if rank<3:
+            MPlay_off[year].append(1)
+        else:
+            # 2010-2011시즌부터 남자부는 3위와 4위가 승점이 3점 이내로 났을경우 준플레이오프에 진출하게 된다.
+            if (rank==3 and MSeason[year].iloc[2]["승점"]-MSeason[year].iloc[3]["승점"]<=3):
+                MPlay_off[year].append(1)
+            else:
+                MPlay_off[year].append(0)
+
+for year in range(len(FSeason)):
+    for rank in range(len(FSeason[year])):
+        if rank<3:
+            FPlay_off[year].append(1)
+        else:
+            FPlay_off[year].append(0)
+
+for loop in range(len(MPlay_off)):            
+    MSeason[loop]["플레이오프_진출"]=MPlay_off[loop]
+    FSeason[loop]["플레이오프_진출"]=FPlay_off[loop]
+
+MAll_data = []
+FAll_data = []
+
+for year in range(len(MSeason)):
+    for team in range(len(MSeason[year])):
+        MAll_data.append(MSeason[year].iloc[team])
+
+for year in range(len(FSeason)):
+    for team in range(len(FSeason[year])):
+        FAll_data.append(FSeason[year].iloc[team])
 
 Mavg = [ [] for i in range(5) ]
 Favg = [ [] for i in range(5) ]
 index = 0
 for i in range(len(MSeason)):
-#    if i<3:
-#        Mavg[index].append(float(MSeason[i].iloc[2:3]["승률"]))
-#        Favg[index].append(float(FSeason[i].iloc[2:3]["승률"]))
     Mavg[index].append(float(MSeason[i].iloc[2:3]["승점"]))
     Favg[index].append(float(FSeason[i].iloc[2:3]["승점"]))
     Mavg[index+1].append(float(MSeason[i].iloc[2:3]["승"]))
@@ -71,7 +109,6 @@ def avg(line):
     return sum/len(line)
 
 
-
 print("남자부 3위 최대 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(max(Mavg[0]),max(Mavg[1]),max(Mavg[2]),max(Mavg[3]),max(Mavg[4])))
 print("남자부 3위 평균 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(avg(Mavg[0]),avg(Mavg[1]),avg(Mavg[2]),avg(Mavg[3]),avg(Mavg[4])))
 print("남자부 3위 최소 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(min(Mavg[0]),min(Mavg[1]),min(Mavg[2]),min(Mavg[3]),min(Mavg[4])))
@@ -82,7 +119,61 @@ print("여자부 3위 최대 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트
 print("여자부 3위 평균 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(avg(Favg[0]),avg(Favg[1]),avg(Favg[2]),avg(Favg[3]),avg(Favg[4])))
 print("여자부 3위 최소 승점 : %2.2f / 승 : %2.2f / 패 : %2.2f / 세트득실률 : %2.2f / 점수득실률 : %2.2f"%(min(Favg[0]),min(Favg[1]),min(Favg[2]),min(Favg[3]),min(Favg[4])))
 
+"""
+# ================================ 의사결정나무 연습 =========================================
+"""
+# http://yamalab.tistory.com/31 <reference>
+
+from sklearn import tree
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+iris = datasets.load_iris()
+
+X = iris.data[:,[2,3]]
+Y = iris.target
+
+#print(X)
+#print(Y)
+
+# 자동으로 데이터셋을 분리해주는 함수
+X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.3,random_state=0)
+
+# 데이터 표준화 작업
+sc = StandardScaler()
+sc.fit(X_train)
+
+# 표준화된 데이터셋
+X_train_std = sc.transform(X_train)
+X_test_std = sc.transform(X_test)
+
+iris_tree = tree.DecisionTreeClassifier(criterion='entropy',max_depth=3,random_state=0)
+iris_tree.fit(X_train,Y_train)
+
+# 정확도를 알기 위한 임포트
+from sklearn.metrics import accuracy_score
+
+Y_pred_tr = iris_tree.predict(X_test)
+
+print("Accuracy : %.2f"%accuracy_score(Y_test,Y_pred_tr))
+
+#from sklearn.tree import export_graphviz
+#import pydotplus
+#from IPython.display import Image
+#
+##from sklearn.tree import export_graphviz
+##import pydotplus
+##from IPython.display import Image
+#
+#dot_data = export_graphviz(iris_tree, out_file=None, feature_names=['petal length','petal width'],
+#                           class_names=iris.target_names, filled=True, rounded=True, special_character=True)
+#graph = pydotplus.graph_from_dot_data(dot_data)
+#Image(graph.create_png())
+"""
+
 #===================== 경기에서 각 항목별 성공비율이 경기의 승리와 연관이 있는지 성공비율을 비교(경기 세부데이터)===============================
+
 """
 #===================== 오늘 또 하나의 좋은 삽질을 했다 ㅎㅎㅎㅎㅎ==================================================================================
 
