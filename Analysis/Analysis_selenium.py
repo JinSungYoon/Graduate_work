@@ -12,43 +12,89 @@ font_location='E:/글꼴/H2GTRE.TTF'
 font_name=fm.FontProperties(fname=font_location).get_name()
 mpl.rc('font',family=font_name)
 
-kovo_result_table = pd.read_pickle('Kovo_result_table')
+# 플레이오프 진출 요인들 담을 리스트
+M_factor_list = [[] for i in range(5)]
+F_factor_list = [[] for i in range(5)]
 
-# 데이터의 평균값 
-def mean(x):
-    return sum(x)/len(x)
+for year in range(13,18):
+    kovo_Mresult_table = pd.read_pickle('Kovo_Male_result_table(%s-%s)'%(str(year),str(year+1)))
+    kovo_Fresult_table = pd.read_pickle('Kovo_Female_result_table(%s-%s)'%(str(year),str(year+1)))
+    
+    #kovo_Mresult_table_17 = pd.read_pickle('Kovo_Male_result_table(17-18)')
+    #kovo_Fresult_table_17 = pd.read_pickle('Kovo_Female_result_table(17-18)')
+    #kovo_Mresult_table_16 = pd.read_pickle('Kovo_Male_result_table(16-17)')
+    #kovo_Fresult_table_16 = pd.read_pickle('Kovo_Female_result_table(16-17)')
+    #kovo_Mresult_table_15 = pd.read_pickle('Kovo_Male_result_table(15-16)')
+    #kovo_Fresult_table_15 = pd.read_pickle('Kovo_Female_result_table(15-16)')
+    #kovo_Mresult_table_14 = pd.read_pickle('Kovo_Male_result_table(14-15)')
+    #kovo_Fresult_table_14 = pd.read_pickle('Kovo_Female_result_table(14-15)')
+    #kovo_Mresult_table_13 = pd.read_pickle('Kovo_Male_result_table(13-14)')
+    #kovo_Fresult_table_13 = pd.read_pickle('Kovo_Female_result_table(13-14)')
+    
+    import Analysis_practice as As
+    
+    # 임시로 플레이오프 진출한 팀에 대한 내용을 추가했다.
+    Male_play_off = []
+    Female_play_off = []
+    
+    #print(len(kovo_Mresult_table))
+    for index in range(len(kovo_Mresult_table)) :
+        if index<3:
+            Male_play_off.append(1)
+        else:
+            if index==3 and kovo_Mresult_table.iloc[2]["승점"]-kovo_Mresult_table.iloc[3]["승점"]<=3:
+                Male_play_off.append(1)
+            else:
+                Male_play_off.append(0)
+    
+    for index in range(len(kovo_Fresult_table)) :
+        if index<3:
+            Female_play_off.append(1)
+        else:
+            Female_play_off.append(0)
+    
+    kovo_Mresult_table["플레이오프진출"] = Male_play_off
+    kovo_Fresult_table["플레이오프진출"] = Female_play_off
+    
+    #kovo_Mresult_table_17["플레이오프진출"] = [1,1,1,0,0,0,0]
+    #kovo_Fresult_table_17["플레이오프진출"] = [1,1,1,0,0,0]
+    #kovo_Mresult_table_16["플레이오프진출"] = [1,1,1,0,0,0,0]
+    #kovo_Fresult_table_16["플레이오프진출"] = [1,1,1,0,0,0]
+    #kovo_Mresult_table_15["플레이오프진출"] = [1,1,1,0,0,0,0]
+    #kovo_Fresult_table_15["플레이오프진출"] = [1,1,1,0,0,0]
+    #kovo_Mresult_table_14["플레이오프진출"] = [1,1,1,0,0,0,0]
+    #kovo_Fresult_table_14["플레이오프진출"] = [1,1,1,0,0,0]
+    #kovo_Mresult_table_13["플레이오프진출"] = [1,1,1,0,0,0,0]
+    #kovo_Fresult_table_13["플레이오프진출"] = [1,1,1,0,0,0]
+    
+    # 데이터프레임의 columns인덱스를 데이터프레임이름.ix[(행요소),(열요소)]하면 인덱스 번호로 접근 가능.
+    #print(kovo_result_table.ix[:,7])
+    
+    # 플레이오프 진출과 다른 요인들이 어느떠한 관계가 있는지 확인
+    
+    for index in range(131):
+        if type(kovo_Mresult_table.ix[0,index])==str:
+            continue
+        else:
+            Co_point = As.correlation(kovo_Mresult_table["플레이오프진출"],kovo_Mresult_table.ix[:,index])
+            if abs(Co_point)>0.75:
+                M_factor_list[year-13].append((kovo_Mresult_table.columns[index],Co_point))
+    #            print("{} Correlation : {}".format(kovo_Mresult_table.columns[index],Co_point))
+    
+    for index in range(131):
+        if type(kovo_Fresult_table.ix[0,index])==str:
+            continue
+        else:
+            Co_point = As.correlation(kovo_Fresult_table["플레이오프진출"],kovo_Fresult_table.ix[:,index])
+            if abs(Co_point)>0.75:
+                F_factor_list[year-13].append((kovo_Fresult_table.columns[index],Co_point))
+    #            print("{} Correlation : {}".format(kovo_Fresult_table.columns[index],Co_point))
+            
+    
+                            
+    #plt.plot(kovo_result_table["플레이오프진출"],kovo_result_table[('득점','득점')],'r+',alpha=0.5)
+    #plt.axis([0,max(kovo_result_table[('공격','범실')])+10,0,max(kovo_result_table[('공격','순위')])+10])
+    #plt.show()
 
-def de_mean(x):
-    x_bar = mean(x)
-    return [x_i - x_bar for x_i in x]
-
-# 모든 값들에 제곱을 해서 더한다.
-def sum_of_squares(x):
-    return sum([x_i**2 for x_i in x])
-
-def variance(x):
-    n = len(x)
-    deviations = de_mean(x)
-    return sum_of_squares(deviations) / (n-1)
-
-def standard_deviation(x):
-    return math.sqrt(variance(x))
-
-def covariance(x,y):
-    n = len(x)
-    return np.dot(de_mean(x),de_mean(y))/(n-1)
-
-def correlation(x,y):
-    stdev_x = standard_deviation(x)
-    stdev_y = standard_deviation(y)
-    if stdev_x > 0 and stdev_y > 0:
-        return covariance(x,y) / stdev_x / stdev_y
-    else:
-        return 0
-
-#print(kovo_result_table[('공격','성공률')])
-print("Covariance : {}".format(covariance(kovo_result_table[('공격','범실')],kovo_result_table[('공격','순위')])))
-
-plt.plot(kovo_result_table[('공격','범실')],kovo_result_table[('공격','순위')],'r+',alpha=0.5)
-plt.axis([0,max(kovo_result_table[('공격','범실')])+10,0,max(kovo_result_table[('공격','순위')])+10])
-plt.show()
+print(M_factor_list)
+print(F_factor_list)
