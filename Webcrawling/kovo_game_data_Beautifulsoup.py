@@ -136,14 +136,13 @@ First=[]  # 7번 인덱스
 Second=[]  # 8번 인덱스
 Third=[]  # 9번 인덱스
 Fourth=[]  # 10번 인덱스
+Fifth=[]  # 10번 인덱스
 result=[] # 12번 인덱스
 
 for page in range(1,20):
     # KOVO HTTP GET Request
         kovo = requests.get('http://www.kovo.co.kr/stats/46101_previous-record.asp?s_part=1&spart=&t_code=&s_season=014&s_pr=201|1&e_season=014&e_pr=201|6&page={}'.format(str(page)))
-        
-        print("%s %s"%(page,kovo))
-    
+            
         # HTML text화 하기
         site = kovo.text
                 
@@ -190,7 +189,7 @@ match = pd.DataFrame({
         )       
 match.index.name="Date"
 
-print(match)
+match.to_pickle("17-18_Season")
 
 #match.to_csv("Season_result.csv",mode='w',encoding='EUC-KR')
 """
@@ -274,7 +273,6 @@ for loop in range(3,len(Away_name)):
 """
 #==================================1번 차트 정리(경기 세부데이텨)=============================================
 """        
-
 
 #1번 차트
 Hchart_1=dish.select('table')[6].text
@@ -499,7 +497,6 @@ for page in range(6,10):
 """
 #================================경기 생중계 문자기록 데이터 크롤링=============================================
 """
-
 Set_success=[]
 Set_rate=[]
 

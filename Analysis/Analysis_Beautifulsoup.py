@@ -19,9 +19,9 @@ mpl.rc('font',family=font_name)
 # 다른 파일에 있는 파일 불러오기 위한 import
 import sys
 # 해당 파일을 불러오기 위해서 paht경로 지정하기
-sys.path.insert(0,'E:/대학교/졸업/졸업작품/웹크롤링/Webcrwaling and scraping using python')
+sys.path.insert(0,'E:\대학교\졸업\졸업작품\웹크롤링\Webcrwaling and scraping using python')
 
-#import kovo_game_data as kovo
+import kovo_game_data_Beautifulsoup as kovo
 
 # Pandas로 데이터 읽어오기
 # utf-8로 인코딩 된 파일 읽어오기
@@ -70,6 +70,8 @@ for year in range(len(FSeason)):
             FPlay_off[year].append(1)
         else:
             FPlay_off[year].append(0)
+
+print(Mplay_off)
 
 for loop in range(len(MPlay_off)):            
     MSeason[loop]["플레이오프_진출"]=MPlay_off[loop]

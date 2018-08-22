@@ -4,6 +4,19 @@ import numpy as np
 import pandas as pd
 import math
 from collections import Counter
+from collections import defaultdict
+from functools import partial
+import random
+
+# 한글 폰트 안 깨지게하기위한 import
+import matplotlib.font_manager as fm
+
+# 가져올 폰트 지정
+font_location='E:/글꼴/H2GTRE.TTF'
+# 폰트 이름 지정 
+font_name=fm.FontProperties(fname=font_location).get_name()
+mpl.rc('font',family=font_name)
+
 
 # 랜덤seed값 설정 
 np.random.seed(0)
@@ -19,12 +32,12 @@ xs = range(51)
 ys = [friend_counts[x] for x in xs]
 
 # 바형태로 그래프 그리기
-plt.bar(xs,ys)
-plt.axis([0,101,0,25])
-plt.title("histogram of friend  Counts")
-plt.xlabel("# of friends")
-plt.ylabel("# of people")
-plt.show()
+#plt.bar(xs,ys)
+#plt.axis([0,101,0,25])
+#plt.title("histogram of friend  Counts")
+#plt.xlabel("# of friends")
+#plt.ylabel("# of people")
+#plt.show()
 
 # 총 수집한 데이터의 개수 파악
 num_points = len(friends)
@@ -32,7 +45,7 @@ num_points = len(friends)
 # 가장 큰 값과 가장 작은값
 largest_value = max(friends)
 smallest_value = min(friends)
-print("number : {} / max : {} / min : {}".format(num_points,largest_value,smallest_value))
+#print("number : {} / max : {} / min : {}".format(num_points,largest_value,smallest_value))
 
 # 데이터를 작은 순서대로 배열하여 가장 작은 값과 두번째로 작은 값 
 sorted_values = sorted(friends)
@@ -42,12 +55,12 @@ middle_value = sorted_values[int(len(sorted_values)/2)]
 second_largest = sorted_values[-2]
 
 #print(sorted_values)
-print("smallest : {} / second_smallest : {} / middle_values : {} / second_largest : {} / largest : {}".format(smallest_value,second_smallest,middle_value,second_largest,largest_value))
+#print("smallest : {} / second_smallest : {} / middle_values : {} / second_largest : {} / largest : {}".format(smallest_value,second_smallest,middle_value,second_largest,largest_value))
 
 # 데이터의 평균값 
 def mean(x):
     return sum(x)/len(x)
-print("friends_mean : {}".format(mean(friends)))
+#print("friends_mean : {}".format(mean(friends)))
 
 # 데이터의 중위값
 def median(x):
@@ -61,26 +74,26 @@ def median(x):
         lo = midpoint-1
         hi = midpoint
         return (sorted_v[lo]+sorted_v[hi])/2
-print("friends_median : {}".format(median(friends)))
+#print("friends_median : {}".format(median(friends)))
 
 # 4분위값
 def quantile(x,p):
     p_index = int(p*len(x))
     return sorted(x)[p_index]
 
-print("low 10% : {}".format(quantile(friends,0.1)))
-print("low 25% : {}".format(quantile(friends,0.25)))
-print("low 75% : {}".format(quantile(friends,0.75)))
-print("low 90% : {}".format(quantile(friends,0.9)))
+#print("low 10% : {}".format(quantile(friends,0.1)))
+#print("low 25% : {}".format(quantile(friends,0.25)))
+#print("low 75% : {}".format(quantile(friends,0.75)))
+#print("low 90% : {}".format(quantile(friends,0.9)))
 
 # 가장 많이 나온 갯수 파악
-print("Most common frined number best5 : {}".format(Counter(friends).most_common(5)))
+#print("Most common frined number best5 : {}".format(Counter(friends).most_common(5)))
 
 # 가장 큰 값과 작은 값의 차이
 def data_range(x):
     return max(x)-min(x)
 
-print("Gap of largest number and smallest number : {}".format(data_range(friends)))
+#print("Gap of largest number and smallest number : {}".format(data_range(friends)))
 
 def de_mean(x):
     x_bar = mean(x)
@@ -95,12 +108,12 @@ def variance(x):
     deviations = de_mean(x)
     return sum_of_squares(deviations) / (n-1)
 
-print("Variance of data : {}".format(variance(friends)))
+#print("Variance of data : {}".format(variance(friends)))
 
 def standard_deviation(x):
     return math.sqrt(variance(x))
 
-print("Standard_deviation of data : {}".format(standard_deviation(friends)))
+#print("Standard_deviation of data : {}".format(standard_deviation(friends)))
 
 # 상관관계 
 
@@ -113,7 +126,7 @@ daily_minutes = daily_minutes = daily_minutes = [1,68.77,51.25,52.08,38.36,44.54
 # 공분산이 양수이면 x의 값이 클수록 y의 값이 크고, x의 값이 작을수록 y의 값이 작아진다는 의미이다.
 # 공분산이 음수이면 x의 값이 클수록 y의 값이 작고, x의 값이 작을수록 y의 값이 커진다는 의미이다.
 # 공분산이 0이면 그와 같은 관계가 존재하지 않는다는 이야기.
-print("Covariance : {}".format(covariance(friends,daily_minutes)))
+#print("Covariance : {}".format(covariance(friends,daily_minutes)))
 
 def correlation(x,y):
     stdev_x = standard_deviation(x)
@@ -125,11 +138,11 @@ def correlation(x,y):
     
 # 상관관계는 단위가 없으며, -1(완벽한 음의 상관관계)에서 1(완벽한 양의 상관관계) 사이의 값을 갖는다.
 # 예를 들어 상관관계가 0.25라면 상대적으로 약한 양의 상관관계를 의미한다.
-print("Correlation : {}".format(correlation(friends,daily_minutes)))
+#print("Correlation : {}".format(correlation(friends,daily_minutes)))
 
-plt.plot(friends, daily_minutes, 'r+',alpha=0.5)
-plt.axis([0,max(friends)+10,0,max(daily_minutes) +10 ])
-plt.show()
+#plt.plot(friends, daily_minutes, 'r+',alpha=0.5)
+#plt.axis([0,max(friends)+10,0,max(daily_minutes) +10 ])
+#plt.show()
 # 100명이라는 친구가 이상치이기 때문에 index에 100을 넣은것이다.
 outlier = friends.index(100)
 
@@ -141,7 +154,138 @@ daily_minutes_good = [x
                       if i != outlier]
 
 # 이상치를 제거했을때의 상관관계
-print("Correlation : {}".format(correlation(friends_good,daily_minutes_good)))
-plt.plot(friends_good,daily_minutes_good,'g+',alpha=0.5)
-plt.axis=[0,max(friends_good)+10,0,max(daily_minutes_good)+10]
+#print("Correlation : {}".format(correlation(friends_good,daily_minutes_good)))
+#plt.plot(friends_good,daily_minutes_good,'g+',alpha=0.5)
+#plt.axis=[0,max(friends_good)+10,0,max(daily_minutes_good)+10]
+#plt.show()
+
+# =================================================================확률==================================================================
+
+# Condition probability(조건부 확률)
+def random_kid():
+    return random.choice(["boy","girl"])
+
+both_girls = 0
+older_girl = 0
+either_girl = 0
+random.seed(0)
+for _ in range(1000):
+    younger = random_kid()
+    older = random_kid()
+    if older == 'girl':
+        older_girl += 1
+    if older == "girl" and younger == "girl":
+        both_girls += 1
+    if older == "girl" or younger == "girl":
+        either_girl +=1
+
+#print(("P(both | older):",both_girls / older_girl))
+#print(("P(both | either):",both_girls / either_girl))
+
+price = ['12900', '6980', '18750', '15800', '15990', '11240', '11420', '8640', '15800', '9900', '11240', '9900', '16400', '6480', '7580', '11780', '5800', '10900', '24800', '19900', '10460', '8640', '6390', '9900', '16400', '7750', '12900', '14410', '15990', '20520', '9900', '7900', '9900', '19800', '7580', '19900']
+
+for index in range(len(price)):
+    price[index] = int(price[index])       
+
+# 1차원 데이터 탐색하기
+def bucketize(point,bucket_size):
+    # 각 데이터를 bucket_size의 배수에 해당하는 구간에 위치시킨다.
+    return bucket_size * math.floor(point / bucket_size)
+
+def make_histogram(points,bucket_size):
+    # 구간을 생성하고 각 구간 내 데이터 개수를 계산해 준다
+    return Counter(bucketize(point,bucket_size)for point in points)
+
+def plot_histogram(points,bucket_size,title=""):
+    histogram = make_histogram(points,bucket_size)
+    plt.bar(histogram.keys(),histogram.values(),width=bucket_size)
+    plt.title(title)
+    plt.show()
+    
+#plot_histogram(price,len(price),"가격히스토그램")
+
+# 2차원 데이터
+
+def normal_cdf(x,mu=0,sigma=1):
+    return (1 + math.erf((x-mu) / math.sqrt(2) / sigma)) / 2
+
+# 이진검색을 통한 역함수 근사
+# 이 함수는 원하는 확률값에 가까워질 때까지 표준정규분포의 구간을 반복적으로 이등분한다.
+    
+def inverse_normal_cdf(p,mu=0,sigma=1,tolerance=0.0001):
+    """이진 검색을 사용해서 역함수를 근사"""
+    # 표준정규분포가 아니라면 표준정규분포로 변환
+    if mu !=0 or sigma !=1:
+        return mu + sigma * inverse_normal_cdf(p, tolerance=tolerance)
+    
+    low_z, low_p = -10.0,0      #normal_cdf(-10)는 0에 근접
+    hi_z, hi_p = 10.0, 1
+    while hi_z - low_z > tolerance:
+        mid_z = (low_z + hi_z) / 2
+        mid_p = normal_cdf(mid_z)
+        if mid_p < p:
+            # 중간값이 너무 작다면 더 큰 값들을 검색
+            low_z, low_p = mid_z, mid_p
+        elif mid_p > p:
+            # 중간값이 너무 크다면 더 작은 값들을 검색
+            hi_z, hi_p = mid_z, mid_p
+        else:
+            break
+    return mid_z
+
+def random_normal():
+    """표준정규분포를 따르는 임의의 데이터를 변환"""
+    return inverse_normal_cdf(random.random())
+
+xs = [random_normal() for _ in range(1000)]
+ys1 = [x + random_normal() / 2 for x in xs ]
+ys2 = [-x + random_normal() / 2 for x in xs]
+
+"""
+plt.scatter(xs,ys1, marker='.',color="red",label='ys1')
+plt.scatter(xs,ys2,marker='.',color="green",label="ys2")
+plt.xlabel('xs')
+plt.ylabel('ys')
+plt.legend(loc=9)
+plt.title("Very Different Joint Distributions")
 plt.show()
+"""
+
+#================================================ Decision Tree ====================================================
+
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn import tree
+
+iris = load_iris()
+#print(iris)
+"""
+test_idx = [0,50,100]
+
+# training data
+train_target = np.delete(iris.target,test_idx)
+train_data = np.delete(iris.data,test_idx,axis=0)
+
+# testing data
+test_target = iris.target[test_idx]
+test_data = iris.data[test_idx]
+
+clf = tree.DecisionTreeClassifier()
+clf.fit(train_data,train_target)
+
+print(test_target)
+print(clf.predict(test_data))
+
+import graphviz 
+dot_data = tree.export_graphviz(clf, out_file=None) 
+graph = graphviz.Source(dot_data) 
+graph.render("iris")
+dot_data = tree.export_graphviz(clf, out_file=None, 
+                         feature_names=iris.feature_names,  
+                         class_names=iris.target_names,  
+                         filled=True, rounded=True,  
+                         special_characters=True)  
+
+graph = graphviz.Source(dot_data)
+graph
+"""
