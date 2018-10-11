@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pylab as plt
 from collections import Counter
+from sklearn import preprocessing
 
 # 한글 폰트 안 깨지게하기위한 import
 import matplotlib.font_manager as fm
@@ -14,9 +15,9 @@ font_name=fm.FontProperties(fname=font_location).get_name()
 mpl.rc('font',family=font_name)
 
 # 시즌을 count를 할 갯수
-count = 7
+count = 10
 # 시작 년도
-syear = 11
+syear = 8
 # =====================================================================7년치 시즌 데이터 ===================================================================
 
 # 플레이오프 진출 요인들 담을 리스트
@@ -89,82 +90,8 @@ for year in range(syear,18):
                 win = 0
                 if Female_lose_score[team] < lose:
                     Female_lose_score[team] = lose
-        
-    """
-    M_try = [[] for s in range(6)]
-    M_correct = [[] for s in range(6)]
-    M_rate = [[] for s in range(6)]
-    
-    F_try = [[] for s in range(6)]
-    F_correct = [[] for s in range(6)]
-    F_rate = [[] for s in range(6)]
-    
-    # 데이터프레임에서 각 부문별 범실율을 뽑아내기 위한 작업    
-    for loop in range(6,len(kovo_Mresult_table.columns)):
-        if kovo_Mresult_table.columns[loop][0]=="리시브" and kovo_Mresult_table.columns[loop][1]=="시도":
-            M_try[0].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="리시브" and kovo_Mresult_table.columns[loop][1]=="범실":
-            M_correct[0].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="세트" and kovo_Mresult_table.columns[loop][1]=="시도":
-            M_try[1].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="세트" and kovo_Mresult_table.columns[loop][1]=="범실":
-            M_correct[1].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="공격" and kovo_Mresult_table.columns[loop][1]=="시도":
-            M_try[2].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="공격" and kovo_Mresult_table.columns[loop][1]=="범실":
-            M_correct[2].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="블로킹" and kovo_Mresult_table.columns[loop][1]=="시도":
-            M_try[3].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="블로킹" and kovo_Mresult_table.columns[loop][1]=="범실":
-            M_correct[3].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="서브" and kovo_Mresult_table.columns[loop][1]=="시도":
-            M_try[4].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="서브" and kovo_Mresult_table.columns[loop][1]=="범실":
-            M_correct[4].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="범실" and kovo_Mresult_table.columns[loop][1]=="세트수":
-            M_try[5].append(kovo_Mresult_table.ix[:,loop])
-        elif kovo_Mresult_table.columns[loop][0]=="범실" and kovo_Mresult_table.columns[loop][1]=="범실":
-            M_correct[5].append(kovo_Mresult_table.ix[:,loop])
-        if kovo_Fresult_table.columns[loop][0]=="리시브" and kovo_Fresult_table.columns[loop][1]=="시도":
-            F_try[0].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="리시브" and kovo_Fresult_table.columns[loop][1]=="범실":
-            F_correct[0].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="세트" and kovo_Fresult_table.columns[loop][1]=="시도":
-            F_try[1].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="세트" and kovo_Fresult_table.columns[loop][1]=="범실":
-            F_correct[1].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="공격" and kovo_Fresult_table.columns[loop][1]=="시도":
-            F_try[2].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="공격" and kovo_Fresult_table.columns[loop][1]=="범실":
-            F_correct[2].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="블로킹" and kovo_Fresult_table.columns[loop][1]=="시도":
-            F_try[3].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="블로킹" and kovo_Fresult_table.columns[loop][1]=="범실":
-            F_correct[3].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="서브" and kovo_Fresult_table.columns[loop][1]=="시도":
-            F_try[4].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="서브" and kovo_Fresult_table.columns[loop][1]=="범실":
-            F_correct[4].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="범실" and kovo_Fresult_table.columns[loop][1]=="세트수":
-            F_try[5].append(kovo_Fresult_table.ix[:,loop])
-        elif kovo_Fresult_table.columns[loop][0]=="범실" and kovo_Fresult_table.columns[loop][1]=="범실":
-            F_correct[5].append(kovo_Fresult_table.ix[:,loop])
-    
-    for index in range(len(M_rate)):
-        M_rate[index].append(M_correct[index][0]/M_try[index][0])
-        F_rate[index].append(F_correct[index][0]/F_try[index][0])
-    
-#    for index in range(len(M_rate)):
-#        print(M_rate[index])
-#        print(F_rate[index])
-   
-#    # 각 부문별(12개) 범실율을 error에 추가한다.
-#    for i in range(len(M_try)):
-#         M_error_rate.append(M_error[i]/M_try[i])       
-#         F_error_rate.append(F_error[i]/F_try[i])       
-    
-    """
-    
+            
+
     import Analysis_practice as As
     
     # 임시로 플레이오프 진출한 팀에 대한 내용을 추가했다.
@@ -176,16 +103,17 @@ for year in range(syear,18):
         if index<3:
             Male_play_off.append(1)
         else:
-            if index==3 and kovo_Mresult_table.iloc[2]["승점"]-kovo_Mresult_table.iloc[3]["승점"]<=3:
-                Male_play_off.append("Pass")
+            # 11년도 시즌 이후부터는 4등과 3등의 승점이 3점 이내일 경우 플레이오프에 진출하므로 조건을 추가해줘야 한다.
+            if year>10 and index==3 and kovo_Mresult_table.iloc[2]["승점"]-kovo_Mresult_table.iloc[3]["승점"]<=3:
+                Male_play_off.append(1)
             else:
-                Male_play_off.append("Fail")
+                Male_play_off.append(0)
     
     for index in range(len(kovo_Fresult_table)) :
         if index<3:
-            Female_play_off.append("Pass")
+            Female_play_off.append(1)
         else:
-            Female_play_off.append("Fail")
+            Female_play_off.append(0)
     
     kovo_Mresult_table["최다연승"] = Male_win_score
     kovo_Mresult_table["최다연패"] = Male_lose_score   
@@ -193,6 +121,13 @@ for year in range(syear,18):
     kovo_Fresult_table["최다연패"] = Female_lose_score
     kovo_Mresult_table["플레이오프진출"] = Male_play_off
     kovo_Fresult_table["플레이오프진출"] = Female_play_off
+    
+    if year<=10:
+        del kovo_Mresult_table["승률"]
+        del kovo_Fresult_table["승률"]
+    else:
+        del kovo_Mresult_table["승점"]
+        del kovo_Fresult_table["승점"]
     
     Mdata.append(kovo_Mresult_table)
     Fdata.append(kovo_Fresult_table)
@@ -210,7 +145,7 @@ for year in range(syear,18):
             Co_point = As.correlation(kovo_Mresult_table["플레이오프진출"],kovo_Mresult_table.ix[:,index])
             if abs(Co_point)>0.75:
 #                M_factor_list[year-syear].append((kovo_Mresult_table.columns[index],Co_point))
-                # 각 요소들이 7년치 데이터에 얼마나 있는지 알아보기 위한 과정
+                # 각 요소들이 10년치 데이터에 얼마나 있는지 알아보기 위한 과정
 #                Mcount.append(kovo_Mresult_table.columns[index])
 #                print("{} Correlation : {}".format(kovo_Mresult_table.columns[index],Co_point))
         # 여자부 각 부문별 상관관계 
@@ -259,8 +194,67 @@ for year in range(syear,18):
 #print(Counter(Mcount))
 #print(Counter(Fcount))
 
-Male_data = pd.concat([Mdata[0],Mdata[1],Mdata[2],Mdata[3],Mdata[4],Mdata[5],Mdata[6]])
-Female_data = pd.concat([Fdata[0],Fdata[1],Fdata[2],Fdata[3],Fdata[4],Fdata[5],Fdata[6]])
+# Male_data와 Female_data로 합친다.
+Male_data = pd.concat([Mdata[0],Mdata[1],Mdata[2],Mdata[3],Mdata[4],Mdata[5],Mdata[6],Mdata[7],Mdata[8],Mdata[9]])
+Female_data = pd.concat([Fdata[0],Fdata[1],Fdata[2],Fdata[3],Fdata[4],Fdata[5],Fdata[6],Fdata[7],Fdata[8],Fdata[9]])
 
+result = Male_data['플레이오프진출']
+del Male_data['플레이오프진출']
+result = Female_data['플레이오프진출']
+del Female_data['플레이오프진출']
+
+# Tuple인 이름을 원래 이름으로 바꾸는 작업
+for loop in range(6,71):
+    # 득점,벌칙,범실은 2개가 겹치므로 하나만 넣어준다.
+    if loop==69 or loop==70:
+        Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]},inplace='True')
+        Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]},inplace='True')
+    else:
+        Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]+'_'+Male_data.columns[loop][-1]},inplace='True')
+        Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]+'_'+Female_data.columns[loop][-1]},inplace='True')
+
+col = ['순위', '경기수', '승', '패', '세트득실률', '점수득실률', '득점_공격', '득점_블로킹', '득점_서브',
+       '득점_득점', '공격_시도', '공격_성공', '공격_공격차단', '공격_범실', '공격_성공률', '오픈공격_시도',
+       '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실', '오픈공격_성공률', '시간차공격_시도', '시간차공격_성공',
+       '시간차공격_공격차단', '시간차공격_범실', '시간차공격_성공률', '이동공격_시도', '이동공격_성공',
+       '이동공격_공격차단', '이동공격_범실', '이동공격_성공률', '후위공격_시도', '후위공격_성공', '후위공격_공격차단',
+       '후위공격_범실', '후위공격_성공률', '속공_시도', '속공_성공', '속공_공격차단', '속공_범실', '속공_성공률',
+       '퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단', '퀵오픈_범실', '퀵오픈_성공률', '서브_시도', '서브_성공',
+       '서브_범실', '서브_세트당평균', '블로킹_시도', '블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실',
+       '블로킹_어시스트', '블로킹_세트당평균', '디그_시도', '디그_성공', '디그_실패', '디그_범실', '디그_세트당평균',
+       '세트_시도', '세트_성공', '세트_범실', '세트_세트당평균', '리시브_시도', '리시브_정확', '리시브_범실',
+       '리시브_세트당평균', '벌칙', '범실', '최다연승', '최다연패']
+
+# 데이터 정규화 과정
+x = Male_data[col].values
+y = Female_data[col].values
+min_max_scaler = preprocessing.MinMaxScaler()
+x_scaled = min_max_scaler.fit_transform(x.astype(float))
+y_scaled = min_max_scaler.fit_transform(y.astype(float))
+Male_data_norm = pd.DataFrame(x_scaled,
+                              columns=col,
+                              index=Male_data.index)
+Female_data_norm = pd.DataFrame(y_scaled,
+                                columns=col,
+                                index=Female_data.index)
+
+"""
+M,N = len(Male_data_norm.index),len(Male_data_norm.columns)
+
+# subtract off the mean for each dimension
+mn = np.mean(Male_data_norm,0).values
+
+Msample = Male_data_norm - mn
+
+# calculate the covariance matrix
+covariance = 1/(N-1)*Msample.dot(Msample.T)
+
+# find the eigenvectors and eigenvalues
+[V,PC] = np.linalg.eig(covariance)
+print(PC)
+# extract diagonal of matrix as vector
+PC = np.diag(PC)
+"""
+# pickle로 변환한다.
 Male_data.to_pickle("Male_data")
 Female_data.to_pickle("Female_data")
