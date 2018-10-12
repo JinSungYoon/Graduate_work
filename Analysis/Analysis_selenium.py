@@ -198,62 +198,159 @@ for year in range(syear,18):
 Male_data = pd.concat([Mdata[0],Mdata[1],Mdata[2],Mdata[3],Mdata[4],Mdata[5],Mdata[6],Mdata[7],Mdata[8],Mdata[9]])
 Female_data = pd.concat([Fdata[0],Fdata[1],Fdata[2],Fdata[3],Fdata[4],Fdata[5],Fdata[6],Fdata[7],Fdata[8],Fdata[9]])
 
-result = Male_data['플레이오프진출']
+# 플레이오프와 관계없는 데이터를 제거한다
+
+def delete_feature(name):
+    del Male_data[name]
+    del Female_data[name]
+    
+delete_feature('경기수')
+delete_feature('순위')
+delete_feature('승')
+delete_feature('패')
+delete_feature('세트득실률')
+delete_feature('점수득실률')
+
+Mplayoff = Male_data['플레이오프진출']
 del Male_data['플레이오프진출']
-result = Female_data['플레이오프진출']
+Fplayoff = Female_data['플레이오프진출']
 del Female_data['플레이오프진출']
 
-# Tuple인 이름을 원래 이름으로 바꾸는 작업
-for loop in range(6,71):
-    # 득점,벌칙,범실은 2개가 겹치므로 하나만 넣어준다.
-    if loop==69 or loop==70:
-        Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]},inplace='True')
-        Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]},inplace='True')
-    else:
-        Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]+'_'+Male_data.columns[loop][-1]},inplace='True')
-        Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]+'_'+Female_data.columns[loop][-1]},inplace='True')
+def change_name(table):
+    for loop in range(0,len(table.columns)):
+        # 튜플로 된 이름들은 길이가 2이므로
+        if len(table.columns[loop])==2:
+            # 득점,벌칙,범실은 2개가 겹치므로 하나만 넣어준다.
+            if table.columns[loop][-1]=='득점' or table.columns[loop][-1]=='벌칙':
+                Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]},inplace='True')
+                Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]},inplace='True')
+            else:
+                Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]+'_'+Male_data.columns[loop][-1]},inplace='True')
+                Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]+'_'+Female_data.columns[loop][-1]},inplace='True')
+   
+change_name(Male_data)
+change_name(Female_data)
 
-col = ['순위', '경기수', '승', '패', '세트득실률', '점수득실률', '득점_공격', '득점_블로킹', '득점_서브',
-       '득점_득점', '공격_시도', '공격_성공', '공격_공격차단', '공격_범실', '공격_성공률', '오픈공격_시도',
-       '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실', '오픈공격_성공률', '시간차공격_시도', '시간차공격_성공',
-       '시간차공격_공격차단', '시간차공격_범실', '시간차공격_성공률', '이동공격_시도', '이동공격_성공',
-       '이동공격_공격차단', '이동공격_범실', '이동공격_성공률', '후위공격_시도', '후위공격_성공', '후위공격_공격차단',
-       '후위공격_범실', '후위공격_성공률', '속공_시도', '속공_성공', '속공_공격차단', '속공_범실', '속공_성공률',
-       '퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단', '퀵오픈_범실', '퀵오픈_성공률', '서브_시도', '서브_성공',
-       '서브_범실', '서브_세트당평균', '블로킹_시도', '블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실',
-       '블로킹_어시스트', '블로킹_세트당평균', '디그_시도', '디그_성공', '디그_실패', '디그_범실', '디그_세트당평균',
-       '세트_시도', '세트_성공', '세트_범실', '세트_세트당평균', '리시브_시도', '리시브_정확', '리시브_범실',
-       '리시브_세트당평균', '벌칙', '범실', '최다연승', '최다연패']
+def data_norm(table):
+    col = table.columns
+    
+    # 데이터 정규화 과정
+    x = table[col].values
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x.astype(float))
+    table = pd.DataFrame(x_scaled,
+                         columns=col,
+                         index=table.index)
+    return table
 
-# 데이터 정규화 과정
-x = Male_data[col].values
-y = Female_data[col].values
-min_max_scaler = preprocessing.MinMaxScaler()
-x_scaled = min_max_scaler.fit_transform(x.astype(float))
-y_scaled = min_max_scaler.fit_transform(y.astype(float))
-Male_data_norm = pd.DataFrame(x_scaled,
-                              columns=col,
-                              index=Male_data.index)
-Female_data_norm = pd.DataFrame(y_scaled,
-                                columns=col,
-                                index=Female_data.index)
+Male_data_norm = data_norm(Male_data)
+Female_data_norm = data_norm(Female_data)
+
+# 데이터 가중치 확인하기
+
+def Confirm_feature_weight(table,result):
+    # 데이터 전처리 과정
+    from sklearn.cross_validation import train_test_split
+    
+    X,y = table.values,result.values
+    
+    # 테스트셋을 원래 데이터의 20%만 허용한다.
+    X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=0)
+    
+    # 1. D차원의 데이터간의 연관성을 찾기 위해 데이터를 먼저 표준화 시킨다. (위에서 표준화를 하였으므로 생각한다.)
+       
+    #sc = StandardScaler()
+    #X_train_std = sc.fit_transform(X_train)
+    #X_test_std = sc.transform(X_test)
+
+    # 2. 특징들 상호간의 각각의 공분산을 구하기 위해 공분산 행렬을 만든다.
+    cov_mat = np.cov(X_train.T) # 공분산 행렬을 생성해주는 함수
+    
+    # 3. 공분산 행렬을 Eigen value와 Eigen vector로 분해한다.
+    # 이것을 Eigendecomposition이라고 한다.
+    
+    Eval,Evec = np.linalg.eig(cov_mat)
+    
+    #print("\nEigenvalues : {}".format(M_Eval))
+    
+    # eigen value의 값이 큰 순서를 E_val_des_order에 저장한다. np.argsort(음수*데이터값)을 넣으면 크기가 큰 숫자부터 1~N까지 나온다.
+    E_val_des_order = np.argsort(-Eval)
+    
+    # 4. 공분산행렬을 통해 그 두가지(Eigen value,Eigen vector)를 유도하는 것이 가능
+    tot = sum(Eval)
+    
+    var_exp = [(i/tot) for i in sorted(Eval,reverse=True)]
+    
+    # Eigen value / Eigen value의 합을 각각 구한다. 나온 각각의 값은 Eigen value의 설명 분산 비율이다.
+    # 즉, 어떤 Eigen value가 가장 설명력이 높은지를 비율로 나타내기 위한 것이다.
+    
+    cum_var_exp = np.cumsum(var_exp)    # 누적 합을 계산해주는 함수 -> 누적 백분위로 표현
+    
+#    plt.figure(figsize=(18,8))
+#    plt.bar(table.columns[E_val_des_order],var_exp,alpha = 0.5,align='center',
+#            label = 'individual explained variance')
+#    plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
+#              label='cumulative explained variance')
+#    plt.xticks(rotation=90)
+#    plt.ylabel('Explained variance ratio')
+#    plt.xlabel('Principal components')
+#    plt.legend(loc='best')
+#    plt.tight_layout()
+#    plt.show()
+    # 각각의 항목에 대한 weight값을 텍스트로 나타내는것
+    weight_order = table.columns[E_val_des_order]
+    for loop in range(0,len(table.columns)):
+        print("변수:{}\tweight:{}".format(weight_order[loop],cum_var_exp[loop]))
+
+#print("============================남자경기요인============================")
+#Confirm_feature_weight(Male_data_norm,Mplayoff)
+#print("============================여자경기요인============================")
+#Confirm_feature_weight(Female_data_norm,Fplayoff)
 
 """
-M,N = len(Male_data_norm.index),len(Male_data_norm.columns)
+# 데이터 전처리 과정
+from sklearn.cross_validation import train_test_split
 
-# subtract off the mean for each dimension
-mn = np.mean(Male_data_norm,0).values
+MX,My = Male_data_norm.values,Mplayoff.values
 
-Msample = Male_data_norm - mn
+MX_train,MX_test,My_train,My_test = train_test_split(MX,My,test_size=0.2,random_state=0)
 
-# calculate the covariance matrix
-covariance = 1/(N-1)*Msample.dot(Msample.T)
+# 1. D차원의 데이터간의 연관성을 찾기 위해 데이터를 먼저 표준화 시킨다.
 
-# find the eigenvectors and eigenvalues
-[V,PC] = np.linalg.eig(covariance)
-print(PC)
-# extract diagonal of matrix as vector
-PC = np.diag(PC)
+# 2. 특징들 상호간의 각각의 공분산을 구하기 위해 공분산 행렬을 만든다.
+cov_mat = np.cov(MX_train.T) # 공분산 행렬을 생성해주는 함수
+
+# 3. 공분산 행렬을 Eigen value와 Eigen vector로 분해한다.
+# 이것을 Eigendecomposition이라고 한다.
+
+M_Eval,M_Evec = np.linalg.eig(cov_mat)
+
+#print("\nEigenvalues : {}".format(M_Eval))
+
+# eigen value의 값이 큰 순서를 E_val_des_order에 저장한다. np.argsort(음수*데이터값)을 넣으면 크기가 큰 숫자부터 1~N까지 나온다.
+E_val_des_order = np.argsort(-M_Eval)
+
+# 4. 공분산행렬을 통해 그 두가지(Eigen value,Eigen vector)를 유도하는 것이 가능
+tot = sum(M_Eval)
+
+var_exp = [(i/tot) for i in sorted(M_Eval,reverse=True)]
+
+# Eigen value / Eigen value의 합을 각각 구한다. 나온 각각의 값은 Eigen value의 설명 분산 비율이다.
+# 즉, 어떤 Eigen value가 가장 설명력이 높은지를 비율로 나타내기 위한 것이다.
+
+cum_var_exp = np.cumsum(var_exp)    # 누적 합을 계산해주는 함수 -> 누적 백분위로 표현
+
+plt.figure(figsize=(18,10))
+plt.bar(Male_data.columns[E_val_des_order],var_exp,alpha = 0.5,align='center',
+        label = 'individual explained variance')
+plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
+          label='cumulative explained variance')
+plt.xticks(rotation=90)
+plt.ylabel('Explained variance ratio')
+plt.xlabel('Principal components')
+plt.legend(loc='best')
+plt.tight_layout()
+plt.show()
 """
 # pickle로 변환한다.
 Male_data.to_pickle("Male_data")
