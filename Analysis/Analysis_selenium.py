@@ -34,6 +34,7 @@ for year in range(syear,18):
     kovo_Mresult_table = pd.read_pickle('Kovo_Male_result_table(%s-%s)'%(str(year),str(year+1)))
     kovo_Fresult_table = pd.read_pickle('Kovo_Female_result_table(%s-%s)'%(str(year),str(year+1)))
     
+    
     # 플레이오프와 관련없는 순위/팀/경기수/세트수에 대한 데이터 제거
     for i in range(7,72):
         if i ==7:   
@@ -46,7 +47,7 @@ for year in range(syear,18):
                for index in range(i,i+4):
                    del kovo_Mresult_table[kovo_Mresult_table.columns[i]]
                    del kovo_Fresult_table[kovo_Fresult_table.columns[i]]
-        
+
     # 시즌 승패결과를 Season_data를 저장
     Season_male_data = pd.read_pickle('Male_Season(%s-%s)'%(str(year),str(year+1)))
     Season_female_data = pd.read_pickle('Female_Season(%s-%s)'%(str(year),str(year+1)))
@@ -62,7 +63,7 @@ for year in range(syear,18):
     Female_lose_score = np.zeros(len(Female_team_name))
     win = 0
     lose = 0
-    
+        
     # 남자팀의 최다 연승 최다 연패를 계산하여 배열에 저장한다.
     for team in range(len(Male_team_name)):
         for index in range(len(Season_male_data)):
@@ -98,7 +99,7 @@ for year in range(syear,18):
     Male_play_off = []
     Female_play_off = []
     
-    #print(len(kovo_Mresult_table))
+    # 1은 진출했다는 의미 / 0은 진출하지 못하였다는 의미
     for index in range(len(kovo_Mresult_table)) :
         if index<3:
             Male_play_off.append(1)
@@ -114,7 +115,7 @@ for year in range(syear,18):
             Female_play_off.append(1)
         else:
             Female_play_off.append(0)
-    
+        
     kovo_Mresult_table["최다연승"] = Male_win_score
     kovo_Mresult_table["최다연패"] = Male_lose_score   
     kovo_Fresult_table["최다연승"] = Female_win_score
@@ -200,16 +201,22 @@ Female_data = pd.concat([Fdata[0],Fdata[1],Fdata[2],Fdata[3],Fdata[4],Fdata[5],F
 
 # 플레이오프와 관계없는 데이터를 제거한다
 
-def delete_feature(name):
-    del Male_data[name]
-    del Female_data[name]
+def delete_feature(table,name):
+    del table[name]
     
-delete_feature('경기수')
-delete_feature('순위')
-delete_feature('승')
-delete_feature('패')
-delete_feature('세트득실률')
-delete_feature('점수득실률')
+delete_feature(Male_data,'경기수')
+delete_feature(Female_data,'경기수')
+delete_feature(Male_data,'순위')
+delete_feature(Female_data,'순위')
+delete_feature(Male_data,'승')
+delete_feature(Female_data,'승')
+delete_feature(Male_data,'패')
+delete_feature(Female_data,'패')
+delete_feature(Male_data,'세트득실률')
+delete_feature(Female_data,'세트득실률')
+delete_feature(Male_data,'점수득실률')
+delete_feature(Female_data,'점수득실률')
+
 
 Mplayoff = Male_data['플레이오프진출']
 del Male_data['플레이오프진출']
@@ -221,15 +228,19 @@ def change_name(table):
         # 튜플로 된 이름들은 길이가 2이므로
         if len(table.columns[loop])==2:
             # 득점,벌칙,범실은 2개가 겹치므로 하나만 넣어준다.
-            if table.columns[loop][-1]=='득점' or table.columns[loop][-1]=='벌칙':
+            if (table.columns[loop][-1]=='득점' and table.columns[loop][-2]=='득점') or (table.columns[loop][-1]=='벌칙' and table.columns[loop][-2]=='벌칙') or (table.columns[loop][-1]=='범실' and table.columns[loop][-2]=='범실'):
                 Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]},inplace='True')
                 Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]},inplace='True')
             else:
                 Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]+'_'+Male_data.columns[loop][-1]},inplace='True')
                 Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]+'_'+Female_data.columns[loop][-1]},inplace='True')
-   
+
 change_name(Male_data)
-change_name(Female_data)
+delete_feature(Male_data,'벌칙')
+delete_feature(Female_data,'벌칙')
+
+Extract_M_Data = Male_data[['공격_시도','공격_범실','공격_공격차단','공격_성공','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
+Extract_F_Data = Female_data[['공격_시도','공격_범실','공격_공격차단','공격_성공','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
 
 def data_norm(table):
     col = table.columns
@@ -250,19 +261,23 @@ Female_data_norm = data_norm(Female_data)
 
 def Confirm_feature_weight(table,result):
     # 데이터 전처리 과정
-    from sklearn.cross_validation import train_test_split
+    from sklearn.model_selection import train_test_split
     
     X,y = table.values,result.values
     
     # 테스트셋을 원래 데이터의 20%만 허용한다.
     X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=0)
     
-    # 1. D차원의 데이터간의 연관성을 찾기 위해 데이터를 먼저 표준화 시킨다. (위에서 표준화를 하였으므로 생각한다.)
-       
-    #sc = StandardScaler()
-    #X_train_std = sc.fit_transform(X_train)
-    #X_test_std = sc.transform(X_test)
-
+    # 1. D차원의 데이터간의 연관성을 찾기 위해 데이터를 먼저 표준화 시킨다. (위에서 표준화를 하였으므로 생략한다.)
+    
+    from sklearn.preprocessing import StandardScaler
+    
+    sc = StandardScaler()
+    X_train_std = sc.fit_transform(X_train)
+    X_test_std = sc.transform(X_test)
+    
+    X_train=X_train_std
+    X_test=X_test_std
     # 2. 특징들 상호간의 각각의 공분산을 구하기 위해 공분산 행렬을 만든다.
     cov_mat = np.cov(X_train.T) # 공분산 행렬을 생성해주는 함수
     
@@ -270,16 +285,16 @@ def Confirm_feature_weight(table,result):
     # 이것을 Eigendecomposition이라고 한다.
     
     Eval,Evec = np.linalg.eig(cov_mat)
-    
-    #print("\nEigenvalues : {}".format(M_Eval))
-    
+        
     # eigen value의 값이 큰 순서를 E_val_des_order에 저장한다. np.argsort(음수*데이터값)을 넣으면 크기가 큰 숫자부터 1~N까지 나온다.
     E_val_des_order = np.argsort(-Eval)
+    
     
     # 4. 공분산행렬을 통해 그 두가지(Eigen value,Eigen vector)를 유도하는 것이 가능
     tot = sum(Eval)
     
     var_exp = [(i/tot) for i in sorted(Eval,reverse=True)]
+    
     
     # Eigen value / Eigen value의 합을 각각 구한다. 나온 각각의 값은 Eigen value의 설명 분산 비율이다.
     # 즉, 어떤 Eigen value가 가장 설명력이 높은지를 비율로 나타내기 위한 것이다.
@@ -292,24 +307,27 @@ def Confirm_feature_weight(table,result):
 #    plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
 #              label='cumulative explained variance')
 #    plt.xticks(rotation=90)
-#    plt.ylabel('Explained variance ratio')
-#    plt.xlabel('Principal components')
+#    plt.ylabel('explained variance ratio')
+#    plt.xlabel('principal components')
 #    plt.legend(loc='best')
 #    plt.tight_layout()
 #    plt.show()
-    # 각각의 항목에 대한 weight값을 텍스트로 나타내는것
-    weight_order = table.columns[E_val_des_order]
-    for loop in range(0,len(table.columns)):
-        print("변수:{}\tweight:{}".format(weight_order[loop],cum_var_exp[loop]))
+    #각각의 항목에 대한 weight값을 텍스트로 나타내는것
+#    weight_order = table.columns[E_val_des_order]
+#    for loop in range(0,len(table.columns)):
+#        print("변수:{}\tweight:{}".format(weight_order[loop],cum_var_exp[loop]))
 
-#print("============================남자경기요인============================")
+print("============================남자경기요인============================")
 #Confirm_feature_weight(Male_data_norm,Mplayoff)
+#Confirm_feature_weight(Male_data,Mplayoff)
+#Confirm_feature_weight(Extract_M_Data,Mplayoff)        
 #print("============================여자경기요인============================")
 #Confirm_feature_weight(Female_data_norm,Fplayoff)
-
+#Confirm_feature_weight(Female_data,Fplayoff)
+        
 """
 # 데이터 전처리 과정
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 MX,My = Male_data_norm.values,Mplayoff.values
 
@@ -352,6 +370,18 @@ plt.legend(loc='best')
 plt.tight_layout()
 plt.show()
 """
+
+Male_data['플레이오프진출'] = Mplayoff
+Female_data['플레이오프진출'] = Fplayoff
+Extract_M_Data['플레이오프진출'] = Mplayoff
+Extract_F_Data['플레이오프진출'] = Fplayoff
+
+
+#print(Extract_M_Data.columns)
+#print(Extract_F_Data.columns)
+
 # pickle로 변환한다.
 Male_data.to_pickle("Male_data")
 Female_data.to_pickle("Female_data")
+Extract_M_Data.to_pickle("Extract_M_Data")
+Extract_F_Data.to_pickle("Extract_F_Data")
