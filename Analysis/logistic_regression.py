@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import matplotlib as mpl
 from sklearn.model_selection import train_test_split
 
 # 한글 폰트 안 깨지게하기위한 import
@@ -71,41 +71,42 @@ for test in range(5):
         else:
             Data = pd.read_pickle("E:/대학교/졸업/졸업작품/분석연습/Extract_F_Data")
             #Data = pd.read_pickle("Female_data")
-            
-        # 남자 테이블 데이터에서 필요없는 columns를 하나씩 지우는 과정
-        
-        # 테스트 데이터와 트레이팅 데이터를 담을 리스트를 생성한다.
-        #Test_X = []
-        #Test_Y = []
-        #Train_X = []
-        #Train_Y = []
-        
+                    
         # 플레이오프 진출 여부 columns와 결정요소들을 분리한다.
         Y = Data["플레이오프진출"]
-        del Data["플레이오프진출"]
-        X = Data
+        X = Data.drop("플레이오프진출",axis=1)
+        
+        features = X.columns
         
         X = X.values
         Y = Y.values
         
-        # 10배수는 test데이터로 나머지는 training 데이터로 넣는다.
-        #for loop in range(0,len(Data)):
-        #    if loop%(5+test) == 0:
-        #        Test_Y.append(Y[loop])
-        #        Test_X.append(X.iloc[loop].values)
-        #    else:
-        #        Train_Y.append(Y[loop])
-        #        Train_X.append(X.iloc[loop].values)
-        
         # 자동으로 트레이닝 셋과 테스트셋 나눈 코드
-        Train_X,Test_X,Train_Y,Test_Y=train_test_split(X,Y,random_state=1)
+        Train_X,Test_X,Train_Y,Test_Y=train_test_split(X,Y,test_size=0.2)
         
         model = LogisticRegression()
         model.__init__()
         model.fit(Train_X,Train_Y)
         
+        if(gender%2==0):
+            print("====================================Results of men's professional team playoffs(Logistic_regression)====================================")
+        else:
+            print("====================================Results of women's professional team playoffs(Logistic_regression)====================================")
+            
         print(Test_Y)
         print(model.predict(Test_X,0.5)*1)
         print("훈련 세트 정확도: {:.3f}".format(model.predict_score(Train_X,Train_Y)))
         print("테스트 세트 정확도: {:.3f}".format(model.predict_score(Test_X,Test_Y)))
-        print(Data.columns[np.argsort(model.theta[1:])])        
+        
+        order = np.argsort(-abs(model.theta[1:]))
+        weight = model.theta[1:]
+        
+        features_name = features[order]
+        variable_weight = weight[order]
+        
+        print(len(features_name),len(variable_weight))
+        
+        print("=====================================Variable weight(Logistis_regression)=====================================")
+        for loop in range(len(features)):
+            print("{} : {}".format(features_name[loop],variable_weight[loop]))
+        

@@ -11,6 +11,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
 from sklearn.tree import export_graphviz
+from sklearn.model_selection  import train_test_split
 
 for test in range(5):
     for gender in range(2):
@@ -23,40 +24,25 @@ for test in range(5):
             
         # 남자 테이블 데이터에서 필요없는 columns를 하나씩 지우는 과정
         
-        # 테스트 데이터와 트레이팅 데이터를 담을 리스트를 생성한다.
-        Test_X = []
-        Test_Y = []
-        Train_X = []
-        Train_Y = []
         
         # 플레이오프 진출 여부 columns와 결정요소들을 분리한다.
         Y = Data["플레이오프진출"]
-        del Data["플레이오프진출"]
-        X = Data
+        X = Data.drop("플레이오프진출",axis=1)
         
         # five fold validation에 의해서 트레이닝 세트와 테스트셋 나눈것
         
-        # 10배수는 test데이터로 나머지는 training 데이터로 넣는다.
-        for loop in range(0,len(Data)):
-            if loop%(5+test) == 0:
-                Test_Y.append(Y[loop])
-                Test_X.append(X.iloc[loop].values)
-            else:
-                Train_Y.append(Y[loop])
-                Train_X.append(X.iloc[loop].values)
-        
         # 자동으로 트레이닝 셋과 테스트셋 나눈 코드
-#        Train_X,Test_X,Train_Y,Test_Y=train_test_split(X,Y,random_state=1)
+        X_train,X_test,y_train,y_test=train_test_split(X,Y,test_size=0.2)
         
-        data_feature_name = Data.columns
+        features = X.columns
             
         # training data로 데이터를 분류하는 작업
         clf = tree.DecisionTreeClassifier(max_depth=4)
-        clf = clf.fit(Train_X,Train_Y)
+        clf = clf.fit(X_train,y_train)
         
         # Randomforest 데이터 훈련작업
         CLF = RandomForestClassifier(bootstrap=True,n_estimators=100,max_features=int(np.sqrt(len(Data.columns))),random_state=0)
-        CLF = CLF.fit(Train_X,Train_Y)
+        CLF = CLF.fit(X_train,y_train)
         
 #        print("###################################Decision_Tree###################################")
 #        print(Test_Y)
@@ -65,23 +51,21 @@ for test in range(5):
 #        print("테스트 세트 정확도: {:.3f}".format(clf.score(Test_X, Test_Y)))
         
         if(gender%2==0):
-            print("=====================================Male_data=====================================")
+            print("====================================Results of men's professional team playoffs(RF)====================================")
         else:
-            print("=====================================Female_data=====================================")
-        print(Test_Y)
-        print(CLF.predict(Test_X))
-        print("훈련 세트 정확도: {:.3f}".format(CLF.score(Train_X, Train_Y)))
-        print("테스트 세트 정확도: {:.3f}".format(CLF.score(Test_X, Test_Y)))
+            print("====================================Results of women's professional team playoffs(RF)====================================")
+        print(y_test.values)
+        print(CLF.predict(X_test))
+        print("훈련 세트 정확도: {:.3f}".format(CLF.score(X_train, y_train)))
+        print("테스트 세트 정확도: {:.3f}".format(CLF.score(X_test, y_test)))
         
         importance = CLF.feature_importances_
         order = np.argsort(-importance)
-        Order_of_variable_name = Data.columns[order]
+        Order_of_variable_name = features[order]
         Order_of_variable_weight = importance[order]
         
-#        print(Data.columns[order])
-#        print(importance[order])
-        print("=====================================변수 가중치=====================================")
-        for i in range(len(Data.columns)):
+        print("=====================================Variable weight(RF)=====================================")
+        for i in range(len(Order_of_variable_name)):
             print("{} : {}".format(Order_of_variable_name[i],Order_of_variable_weight[i]))
         
         
@@ -109,9 +93,6 @@ for test in range(5):
 #            graph.write_svg('Random_Male_playoff(%s).svg'%(test))
 #        else:
 #            graph.write_svg('Random_Female_playoff(%s).svg'%(test))
-
-        from subprocess import call
-        call(['dot','-Tpng','tree.dot','-o','tree.png','-Gdpi=600'])
 
 """
 # Data Collection
