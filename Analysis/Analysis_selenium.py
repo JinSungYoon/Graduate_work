@@ -91,8 +91,10 @@ for year in range(syear,18):
                 win = 0
                 if Female_lose_score[team] < lose:
                     Female_lose_score[team] = lose
-            
-
+    
+    Male_attack_efficiency =  ((kovo_Mresult_table[('공격', '성공')]-kovo_Mresult_table[('공격', '공격차단')]-kovo_Mresult_table[('공격', '범실')])/kovo_Mresult_table[('공격', '시도')])*100
+    Female_attack_efficiency = ((kovo_Fresult_table[('공격', '성공')]-kovo_Fresult_table[('공격', '공격차단')]-kovo_Fresult_table[('공격', '범실')])/kovo_Fresult_table[('공격', '시도')])*100
+    
     import Analysis_practice as As
     
     # 임시로 플레이오프 진출한 팀에 대한 내용을 추가했다.
@@ -115,13 +117,17 @@ for year in range(syear,18):
             Female_play_off.append(1)
         else:
             Female_play_off.append(0)
-        
+    
+    # 공격 효율이라는 항목을 추가하므로 공격파트에 추가를 해줘야 보기 편하기에 삽입하였다.
+    kovo_Mresult_table.insert(loc=16,column="공격_효율",value=Male_attack_efficiency)
+    kovo_Fresult_table.insert(loc=16,column="공격_효율",value=Female_attack_efficiency)
     kovo_Mresult_table["최다연승"] = Male_win_score
     kovo_Mresult_table["최다연패"] = Male_lose_score   
     kovo_Fresult_table["최다연승"] = Female_win_score
     kovo_Fresult_table["최다연패"] = Female_lose_score
     kovo_Mresult_table["플레이오프진출"] = Male_play_off
     kovo_Fresult_table["플레이오프진출"] = Female_play_off
+    
     
     if year<=10:
         del kovo_Mresult_table["승률"]
@@ -236,11 +242,10 @@ def change_name(table):
                 Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]+'_'+Female_data.columns[loop][-1]},inplace='True')
 
 change_name(Male_data)
+print(Male_data.columns)
+
 delete_feature(Male_data,'벌칙')
 delete_feature(Female_data,'벌칙')
-
-Extract_M_Data = Male_data[['공격_시도','공격_범실','공격_공격차단','공격_성공','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
-Extract_F_Data = Female_data[['공격_시도','공격_범실','공격_공격차단','공격_성공','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
 
 def data_norm(table):
     col = table.columns
@@ -256,6 +261,11 @@ def data_norm(table):
 
 Male_data_norm = data_norm(Male_data)
 Female_data_norm = data_norm(Female_data)
+
+# 주요요인 추출
+Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
+Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
+
 
 # 데이터 가중치 확인하기
 

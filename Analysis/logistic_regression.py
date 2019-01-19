@@ -104,8 +104,6 @@ for test in range(5):
         features_name = features[order]
         variable_weight = weight[order]
         
-        print(len(features_name),len(variable_weight))
-        
         print("=====================================Variable weight(Logistis_regression)=====================================")
         for loop in range(len(features)):
             print("{} : {}".format(features_name[loop],variable_weight[loop]))
