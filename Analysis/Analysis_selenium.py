@@ -207,6 +207,7 @@ Female_data = pd.concat([Fdata[0],Fdata[1],Fdata[2],Fdata[3],Fdata[4],Fdata[5],F
 
 # 플레이오프와 관계없는 데이터를 제거한다
 
+
 def delete_feature(table,name):
     del table[name]
     
@@ -242,7 +243,6 @@ def change_name(table):
                 Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]+'_'+Female_data.columns[loop][-1]},inplace='True')
 
 change_name(Male_data)
-print(Male_data.columns)
 
 delete_feature(Male_data,'벌칙')
 delete_feature(Female_data,'벌칙')
@@ -266,7 +266,6 @@ Female_data_norm = data_norm(Female_data)
 Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
 Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
 
-
 # 데이터 가중치 확인하기
 
 def Confirm_feature_weight(table,result):
@@ -288,6 +287,9 @@ def Confirm_feature_weight(table,result):
     
     X_train=X_train_std
     X_test=X_test_std
+#    X_cen = X_train - X_train.mean(axis=0)
+#    cov_mat = np.dot(X_cen.T,X_cen)/len(X_cen)
+    
     # 2. 특징들 상호간의 각각의 공분산을 구하기 위해 공분산 행렬을 만든다.
     cov_mat = np.cov(X_train.T) # 공분산 행렬을 생성해주는 함수
     
@@ -295,10 +297,11 @@ def Confirm_feature_weight(table,result):
     # 이것을 Eigendecomposition이라고 한다.
     
     Eval,Evec = np.linalg.eig(cov_mat)
-        
-    # eigen value의 값이 큰 순서를 E_val_des_order에 저장한다. np.argsort(음수*데이터값)을 넣으면 크기가 큰 숫자부터 1~N까지 나온다.
-    E_val_des_order = np.argsort(-Eval)
+    print(Eval)
     
+    # eigen value의 값이 큰 순서를 E_val_des_order에 저장한다. np.argsort(음수*데이터값)을 넣으면 크기가 큰 숫자부터 1~N까지 나온다.
+    E_val_des_order = np.argsort(-abs(Eval))
+    print(E_val_des_order)
     
     # 4. 공분산행렬을 통해 그 두가지(Eigen value,Eigen vector)를 유도하는 것이 가능
     tot = sum(Eval)
@@ -311,87 +314,43 @@ def Confirm_feature_weight(table,result):
     
     cum_var_exp = np.cumsum(var_exp)    # 누적 합을 계산해주는 함수 -> 누적 백분위로 표현
     
-#    plt.figure(figsize=(18,8))
-#    plt.bar(table.columns[E_val_des_order],var_exp,alpha = 0.5,align='center',
-#            label = 'individual explained variance')
-#    plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
-#              label='cumulative explained variance')
-#    plt.xticks(rotation=90)
-#    plt.ylabel('explained variance ratio')
-#    plt.xlabel('principal components')
-#    plt.legend(loc='best')
-#    plt.tight_layout()
-#    plt.show()
-    #각각의 항목에 대한 weight값을 텍스트로 나타내는것
-#    weight_order = table.columns[E_val_des_order]
-#    for loop in range(0,len(table.columns)):
-#        print("변수:{}\tweight:{}".format(weight_order[loop],cum_var_exp[loop]))
+    plt.figure(figsize=(18,8))
+    plt.bar(table.columns[E_val_des_order],var_exp,alpha = 0.5,align='center',
+            label = 'individual explained variance')
+    plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
+              label='cumulative explained variance')
+    plt.xticks(rotation=90)
+    plt.ylabel('explained variance ratio')
+    plt.xlabel('principal components')
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+    # 각각의 항목에 대한 weight값을 텍스트로 나타내는것
+    weight_order = table.columns[E_val_des_order]
+    for loop in range(0,len(table.columns)):
+        print("변수:{}\tweight:{}".format(weight_order[loop],cum_var_exp[loop]))
 
-print("============================남자경기요인============================")
+print(Extract_M_Data.head())
+print(Extract_F_Data.head())
+#print("============================남자경기요인============================")
 #Confirm_feature_weight(Male_data_norm,Mplayoff)
 #Confirm_feature_weight(Male_data,Mplayoff)
 #Confirm_feature_weight(Extract_M_Data,Mplayoff)        
 #print("============================여자경기요인============================")
 #Confirm_feature_weight(Female_data_norm,Fplayoff)
 #Confirm_feature_weight(Female_data,Fplayoff)
-        
-"""
-# 데이터 전처리 과정
-from sklearn.model_selection import train_test_split
+#Confirm_feature_weight(Extract_M_Data,Mplayoff)        
 
-MX,My = Male_data_norm.values,Mplayoff.values
+#Male_data['플레이오프진출'] = Mplayoff
+#Female_data['플레이오프진출'] = Fplayoff
+#Extract_M_Data['플레이오프진출'] = Mplayoff
+#Extract_F_Data['플레이오프진출'] = Fplayoff
 
-MX_train,MX_test,My_train,My_test = train_test_split(MX,My,test_size=0.2,random_state=0)
-
-# 1. D차원의 데이터간의 연관성을 찾기 위해 데이터를 먼저 표준화 시킨다.
-
-# 2. 특징들 상호간의 각각의 공분산을 구하기 위해 공분산 행렬을 만든다.
-cov_mat = np.cov(MX_train.T) # 공분산 행렬을 생성해주는 함수
-
-# 3. 공분산 행렬을 Eigen value와 Eigen vector로 분해한다.
-# 이것을 Eigendecomposition이라고 한다.
-
-M_Eval,M_Evec = np.linalg.eig(cov_mat)
-
-#print("\nEigenvalues : {}".format(M_Eval))
-
-# eigen value의 값이 큰 순서를 E_val_des_order에 저장한다. np.argsort(음수*데이터값)을 넣으면 크기가 큰 숫자부터 1~N까지 나온다.
-E_val_des_order = np.argsort(-M_Eval)
-
-# 4. 공분산행렬을 통해 그 두가지(Eigen value,Eigen vector)를 유도하는 것이 가능
-tot = sum(M_Eval)
-
-var_exp = [(i/tot) for i in sorted(M_Eval,reverse=True)]
-
-# Eigen value / Eigen value의 합을 각각 구한다. 나온 각각의 값은 Eigen value의 설명 분산 비율이다.
-# 즉, 어떤 Eigen value가 가장 설명력이 높은지를 비율로 나타내기 위한 것이다.
-
-cum_var_exp = np.cumsum(var_exp)    # 누적 합을 계산해주는 함수 -> 누적 백분위로 표현
-
-plt.figure(figsize=(18,10))
-plt.bar(Male_data.columns[E_val_des_order],var_exp,alpha = 0.5,align='center',
-        label = 'individual explained variance')
-plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
-          label='cumulative explained variance')
-plt.xticks(rotation=90)
-plt.ylabel('Explained variance ratio')
-plt.xlabel('Principal components')
-plt.legend(loc='best')
-plt.tight_layout()
-plt.show()
-"""
-
-Male_data['플레이오프진출'] = Mplayoff
-Female_data['플레이오프진출'] = Fplayoff
-Extract_M_Data['플레이오프진출'] = Mplayoff
-Extract_F_Data['플레이오프진출'] = Fplayoff
-
-
-#print(Extract_M_Data.columns)
-#print(Extract_F_Data.columns)
-
-# pickle로 변환한다.
-Male_data.to_pickle("Male_data")
-Female_data.to_pickle("Female_data")
-Extract_M_Data.to_pickle("Extract_M_Data")
-Extract_F_Data.to_pickle("Extract_F_Data")
+##print(Extract_M_Data.columns)
+##print(Extract_F_Data.columns)
+#
+## pickle로 변환한다.
+#Male_data.to_pickle("Male_data")
+#Female_data.to_pickle("Female_data")
+#Extract_M_Data.to_pickle("Extract_M_Data")
+#Extract_F_Data.to_pickle("Extract_F_Data")
