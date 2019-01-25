@@ -34,7 +34,6 @@ for year in range(syear,18):
     kovo_Mresult_table = pd.read_pickle('Kovo_Male_result_table(%s-%s)'%(str(year),str(year+1)))
     kovo_Fresult_table = pd.read_pickle('Kovo_Female_result_table(%s-%s)'%(str(year),str(year+1)))
     
-    
     # 플레이오프와 관련없는 순위/팀/경기수/세트수에 대한 데이터 제거
     for i in range(7,72):
         if i ==7:   
@@ -128,7 +127,6 @@ for year in range(syear,18):
     kovo_Mresult_table["플레이오프진출"] = Male_play_off
     kovo_Fresult_table["플레이오프진출"] = Female_play_off
     
-    
     if year<=10:
         del kovo_Mresult_table["승률"]
         del kovo_Fresult_table["승률"]
@@ -139,74 +137,15 @@ for year in range(syear,18):
     Mdata.append(kovo_Mresult_table)
     Fdata.append(kovo_Fresult_table)
 
-    # 데이터프레임의 columns인덱스를 데이터프레임이름.ix[(행요소),(열요소)]하면 인덱스 번호로 접근 가능.
-    #print(kovo_result_table.ix[:,7])
-    
-    # 플레이오프 진출과 다른 요인들이 어느떠한 관계가 있는지 확인
-    """
-    for index in range(len(kovo_Mresult_table.columns)-1):
-        # 남자부 각 부문별 상관관계
-        if type(kovo_Mresult_table.ix[0,index])==str:
-            continue
-        else:
-            Co_point = As.correlation(kovo_Mresult_table["플레이오프진출"],kovo_Mresult_table.ix[:,index])
-            if abs(Co_point)>0.75:
-#                M_factor_list[year-syear].append((kovo_Mresult_table.columns[index],Co_point))
-                # 각 요소들이 10년치 데이터에 얼마나 있는지 알아보기 위한 과정
-#                Mcount.append(kovo_Mresult_table.columns[index])
-#                print("{} Correlation : {}".format(kovo_Mresult_table.columns[index],Co_point))
-        # 여자부 각 부문별 상관관계 
-        if type(kovo_Fresult_table.ix[0,index])==str:
-            continue
-        else:
-            Co_point = As.correlation(kovo_Fresult_table["플레이오프진출"],kovo_Fresult_table.ix[:,index])
-            if abs(Co_point)>0.75:
-                F_factor_list[year-syear].append((kovo_Fresult_table.columns[index],Co_point))
-                # 각 요소들이 몇개씩 있는지 알아보기 위해서 하나의 리스트에 다 넣는과정
-#                Fcount.append(kovo_Fresult_table.columns[index])
-#                print("{} Correlation : {}".format(kovo_Fresult_table.columns[index],Co_point))     
-     
-    # 각 부문별 성공률을 플레이오프와 비교해 본다
-#    for index in range(len(M_rate)):
-#         Co_point = As.correlation(kovo_Fresult_table["플레이오프진출"],M_rate[index][0])
-#        if abs(Co_point) > 0.75:
-#            M_factor_list[year-syear].append((index,Co_point))
-#        Co_point = As.correlation(kovo_Fresult_table["플레이오프진출"],F_rate[index][0])
-#        if abs(Co_point) > 0.75:
-#            F_factor_list[year-syear].append((index,Co_point))
-   
-    # 어떠한 항목 실험하는 실험실
-    
-    Co_point = As.correlation(kovo_Mresult_table["플레이오프진출"],kovo_Mresult_table[("득점","득점")]/kovo_Mresult_table[("득점","세트수")])
-    if abs(Co_point) > 0.75:
-        M_factor_list[year-13].append(("세트당 득점",Co_point))
-    Co_point = As.correlation(kovo_Mresult_table["플레이오프진출"],kovo_Mresult_table[("득점","득점")]/kovo_Mresult_table[("득점","경기수")])
-    if abs(Co_point) > 0.75:
-        M_factor_list[year-13].append(("경기당 득점",Co_point))
-    Co_point = As.correlation(kovo_Fresult_table["플레이오프진출"],kovo_Fresult_table[("득점","득점")]/kovo_Fresult_table[("득점","세트수")])
-    if abs(Co_point) > 0.75:
-        F_factor_list[year-13].append(("세트당 득점",Co_point))
-    Co_point = As.correlation(kovo_Fresult_table["플레이오프진출"],kovo_Fresult_table[("득점","득점")]/kovo_Fresult_table[("득점","경기수")])
-    if abs(Co_point) > 0.75:
-        F_factor_list[year-13].append(("경기당 득점",Co_point))
-    """
-    #plt.plot(kovo_result_table["플레이오프진출"],kovo_result_table[('득점','득점')],'r+',alpha=0.5)
-    #plt.axis([0,max(kovo_result_table[('공격','범실')])+10,0,max(kovo_result_table[('공격','순위')])+10])
-    #plt.show()
-
-#print(M_factor_list)
-#print(F_factor_list)
-
-# 각 요소들이 7년치 데이터에서 얼마나 많이 나오는지 알아보기 위함
-#print(Counter(Mcount))
-#print(Counter(Fcount))
-
 # Male_data와 Female_data로 합친다.
 Male_data = pd.concat([Mdata[0],Mdata[1],Mdata[2],Mdata[3],Mdata[4],Mdata[5],Mdata[6],Mdata[7],Mdata[8],Mdata[9]])
 Female_data = pd.concat([Fdata[0],Fdata[1],Fdata[2],Fdata[3],Fdata[4],Fdata[5],Fdata[6],Fdata[7],Fdata[8],Fdata[9]])
 
-# 플레이오프와 관계없는 데이터를 제거한다
+# 10년치의 데이터를 합친(공격효율,최다연승,최다연패,플레이오프진출)
+Male_data.to_pickle("Total_M_Data")
+Female_data.to_pickle("Total_F_Data")
 
+# 플레이오프와 관계없는 데이터를 제거한다
 
 def delete_feature(table,name):
     del table[name]
@@ -223,7 +162,6 @@ delete_feature(Male_data,'세트득실률')
 delete_feature(Female_data,'세트득실률')
 delete_feature(Male_data,'점수득실률')
 delete_feature(Female_data,'점수득실률')
-
 
 Mplayoff = Male_data['플레이오프진출']
 del Male_data['플레이오프진출']
@@ -308,37 +246,34 @@ def Confirm_feature_weight(table,result):
     
     var_exp = [(i/tot) for i in sorted(Eval,reverse=True)]
     
-    
     # Eigen value / Eigen value의 합을 각각 구한다. 나온 각각의 값은 Eigen value의 설명 분산 비율이다.
     # 즉, 어떤 Eigen value가 가장 설명력이 높은지를 비율로 나타내기 위한 것이다.
     
     cum_var_exp = np.cumsum(var_exp)    # 누적 합을 계산해주는 함수 -> 누적 백분위로 표현
     
-    plt.figure(figsize=(18,8))
-    plt.bar(table.columns[E_val_des_order],var_exp,alpha = 0.5,align='center',
-            label = 'individual explained variance')
-    plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
-              label='cumulative explained variance')
-    plt.xticks(rotation=90)
-    plt.ylabel('explained variance ratio')
-    plt.xlabel('principal components')
-    plt.legend(loc='best')
-    plt.tight_layout()
-    plt.show()
-    # 각각의 항목에 대한 weight값을 텍스트로 나타내는것
-    weight_order = table.columns[E_val_des_order]
-    for loop in range(0,len(table.columns)):
-        print("변수:{}\tweight:{}".format(weight_order[loop],cum_var_exp[loop]))
+#    plt.figure(figsize=(18,8))
+#    plt.bar(table.columns[E_val_des_order],var_exp,alpha = 0.5,align='center',
+#            label = 'individual explained variance')
+#    plt.step(range(0,len(cum_var_exp)),cum_var_exp,where='mid',
+#              label='cumulative explained variance')
+#    plt.xticks(rotation=90)
+#    plt.ylabel('explained variance ratio')
+#    plt.xlabel('principal components')
+#    plt.legend(loc='best')
+#    plt.tight_layout()
+#    plt.show()
+#    # 각각의 항목에 대한 weight값을 텍스트로 나타내는것
+#    weight_order = table.columns[E_val_des_order]
+#    for loop in range(0,len(table.columns)):
+#        print("변수:{}\tweight:{}".format(weight_order[loop],cum_var_exp[loop]))
 
-print(Extract_M_Data.head())
-print(Extract_F_Data.head())
 #print("============================남자경기요인============================")
 #Confirm_feature_weight(Male_data_norm,Mplayoff)
-#Confirm_feature_weight(Male_data,Mplayoff)
+Confirm_feature_weight(Male_data,Mplayoff)
 #Confirm_feature_weight(Extract_M_Data,Mplayoff)        
 #print("============================여자경기요인============================")
 #Confirm_feature_weight(Female_data_norm,Fplayoff)
-#Confirm_feature_weight(Female_data,Fplayoff)
+Confirm_feature_weight(Female_data,Fplayoff)
 #Confirm_feature_weight(Extract_M_Data,Mplayoff)        
 
 #Male_data['플레이오프진출'] = Mplayoff

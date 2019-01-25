@@ -35,21 +35,20 @@ def show_graph(x,y,tech):
     plt.tight_layout()
     plt.show()
     
-#    plt.bar(np.arange(len(x)),height,bar_width,
-#                  alpha = opacity,
-#                  color = '#000FF4',
-#                  label = "플레이오프 진출요인 가중치")
-#    plt.xlabel('경기요인')
-#    plt.ylabel('가중치')
-#    plt.title("%s로 분석한 플레이오프 진출 경기요인 가중치"%(skill))
-#    
-#    plt.xticks(y,x,rotation=90)
-#    plt.legend()
-#    
-#    plt.tight_layout()
-#    plt.show()
+def cal_rank(origin,order):
+    rank_score = np.zeros(len(origin))
+    for index in range(len(origin)):
+        for loop in range(len(order)):
+            if(origin[index]==order[loop]):
+                rank_score[index]+=loop+1
+                break
+    return rank_score
 
-for gender in range(2):
+Mrank = np.zeros(16)
+Frank = np.zeros(16)
+   
+for loop in range(5):
+    for gender in range(2):
         if gender%2==0:
             Data = pd.read_pickle("E:/대학교/졸업/졸업작품/분석연습/Extract_M_Data")
 #            Data = pd.read_pickle("Male_data")
@@ -61,25 +60,46 @@ for gender in range(2):
         Y = Data["플레이오프진출"]
         X = Data.drop("플레이오프진출",axis=1)
         
-        # 자동으로 트레이닝 셋과 테스트셋 나눈 코드
-        X_train,X_test,y_train,y_test=train_test_split(X,Y,test_size=0.2)
+        train = []
+        test = []
         
+        for i in range(len(Data)-1):
+            if(i%5==loop):
+                test.append(i)
+            else:
+                train.append(i)
+        X_train = X.iloc[train]
+        y_train = Y.iloc[train]
+        X_test = X.iloc[test]
+        y_test = Y.iloc[test]
+        # 자동으로 트레이닝 셋과 테스트셋 나눈 코드
+#        X_train,X_test,y_train,y_test=train_test_split(X,Y,test_size=0.2)
+#        print(X_test)
+#        print(X_testp)
         features = X.columns
+#        rank = np.zeros(len(features))
         
         # Logistic_regression으로 데이터 훈련
-        Lmodel = LogisticRegression()
+        # For small datasets,'liblinear' is a good choice
+        # If the  option chosen is 'ovr' then a binary problem is fit for each label.
+        # for liblinear and lbfgs solvers set verbose to any positive number for verbosity.
+        Lmodel = LogisticRegression(solver="liblinear",multi_class="ovr",verbose=1)
         Lmodel = Lmodel.fit(X_train,y_train)
         
         # SVM으로 데이터 훈련
-        Smodel = SVC(kernel="linear")
+        # Kernel coefficient for 'rbf','poly' and 'sigmoid'
+        # the original one-vs-one decision function
+        # To use a coef_ function you must use linear kernel.
+        Smodel = SVC(C=1.0,kernel="linear",gamma="auto",decision_function_shape="ovo")
         Smodel.fit(X_train,y_train)
         
         # Decision tree로 데이터 훈련
-        Dmodel = tree.DecisionTreeClassifier(max_depth=10)
+        max_dep = int(np.sqrt(len(X_train.columns)))
+        Dmodel = tree.DecisionTreeClassifier(max_depth=max_dep)
         Dmodel = Dmodel.fit(X_train,y_train)
         
         # Randomforest 데이터 훈련작업
-        Rmodel = RandomForestClassifier(bootstrap=True,n_estimators=100,max_features=int(np.sqrt(len(Data.columns))),random_state=0)
+        Rmodel = RandomForestClassifier(bootstrap=True,n_estimators=100,max_features=max_dep,random_state=0)
         Rmodel = Rmodel.fit(X_train,y_train)
         
         # GradientBoosting 데이터 훈련작업
@@ -131,6 +151,10 @@ for gender in range(2):
         Lweight = weight[Lorder]
         Lname = Lname[0]
         Lweight = np.round(Lweight[0],3)
+        if(gender%2==0):
+            Mrank+=cal_rank(features,Lname)
+        else:
+            Frank+=cal_rank(features,Lname)
         show_graph(Lname,Lweight,"Logistic-regression")
         
 #        for loop in range(len(features)):
@@ -142,6 +166,10 @@ for gender in range(2):
         Sweight = np.round(Smodel.coef_[0][Sorder],3)
         Sweight = Sweight[0]
         Sname = Sname[0]
+        if(gender%2==0):
+            Mrank+=cal_rank(features,Sname)
+        else:
+            Frank+=cal_rank(features,Sname)
         show_graph(Sname,Sweight,"Support-vector-machine")
         
 #        for loop in range(len(features)):
@@ -152,6 +180,10 @@ for gender in range(2):
         Dorder = np.argsort(-abs(Dweight))
         Dname = features[Dorder]
         Dweight = np.round(Dweight[Dorder],3)
+        if(gender%2==0):
+            Mrank+=cal_rank(features,Dname)
+        else:
+            Frank+=cal_rank(features,Dname)
         show_graph(Dname,Dweight,"Decision-Tree")
         
 #        for i in range(len(features)):
@@ -162,12 +194,50 @@ for gender in range(2):
         Rorder = np.argsort(-abs(Rweight))
         Rname = features[Rorder]
         Rweight = np.round(Rweight[Rorder],3)
+        if(gender%2==0):
+            Mrank+=cal_rank(features,Rname)
+        else:
+            Frank+=cal_rank(features,Rname)
         show_graph(Rname,Rweight,"Random-Forest-Classifier")
         
         print("*** Variable weight(GB) ***")
         Gweight = Gmodel.feature_importances_
         Gorder = np.argsort(-abs(Gweight))
-        
         Gname = features[Gorder]
         Gweight = np.round(Gweight[Gorder],3)
+        if(gender%2==0):
+            Mrank+=cal_rank(features,Gname)
+        else:
+            Frank+=cal_rank(features,Gname)
         show_graph(Gname,Gweight,"Gradient-Boosting-Classifier")
+
+        
+        if(gender%2==0):
+            print(features)
+            print(Mrank)
+            order = np.argsort(Mrank)
+            print(features[order])
+            print(Mrank[order])
+        else:
+            print(features)
+            print(Frank)
+            order = np.argsort(Frank)
+            print(features[order])
+            print(Frank[order])
+        
+        
+Morder = np.argsort(Mrank)
+print(features[Morder])
+print(Mrank[Morder])
+
+Forder = np.argsort(Frank)
+print(features[Forder])
+print(Frank[Forder])
+
+# 참고한 사이트
+# Logistic_regression
+#       https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+
+# SVM
+#       https://bskyvision.com/163
+#       https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC
