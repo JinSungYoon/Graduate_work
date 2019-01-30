@@ -9,6 +9,7 @@ from sklearn.svm import SVC
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.neural_network import MLPClassifier
 
 # 한글 폰트 안 깨지기 위한 import
 import matplotlib.font_manager as fm
@@ -106,6 +107,10 @@ for loop in range(5):
         Gmodel = GradientBoostingClassifier()
         Gmodel = Gmodel.fit(X_train,y_train)
         
+        # Neural Network 데이터 훈련
+        Nmodel = MLPClassifier(hidden_layer_sizes=(1,),activation='logistic',solver='lbfgs')
+        Nmodel = Nmodel.fit(X_train,y_train)
+        
         if(gender%2==0):
             print("******************************Results of men's professional team playoffs******************************")
         else:
@@ -130,7 +135,7 @@ for loop in range(5):
         print("테스트 세트 정확도: {:.3f}".format(Dmodel.score(X_test, y_test)))
 
         
-        print("****************************** 랜던 포레스트 예측 정확도 ******************************")
+        print("****************************** 랜덤 포레스트 예측 정확도 ******************************")
         print(y_test.values)
         print(Rmodel.predict(X_test))
         print("훈련 세트 정확도: {:.3f}".format(Rmodel.score(X_train, y_train)))
@@ -141,6 +146,13 @@ for loop in range(5):
         print(Gmodel.predict(X_test))
         print("훈련 세트 정확도: {:.3f}".format(Gmodel.score(X_train, y_train)))
         print("테스트 세트 정확도: {:.3f}".format(Gmodel.score(X_test, y_test)))
+        
+        print("****************************** 뉴런 네트워크 예측 정확도 ******************************")
+        print(y_test.values)
+        print(Nmodel.predict(X_test))
+        print("훈련 세트 정확도 : {:.3f}".format(Nmodel.score(X_train,y_train)))
+        print("테스트 세트 정확도: {:.3f}".format(Nmodel.score(X_test,y_test)))
+        
         
         print("*** Variable weight(LR) ***")
         Lorder = np.argsort(-abs(Lmodel.coef_))
@@ -211,16 +223,23 @@ for loop in range(5):
             Frank+=cal_rank(features,Gname)
         show_graph(Gname,Gweight,"Gradient-Boosting-Classifier")
 
+        print("*** Variable weight(NN) ***")
+        Nweight = Nmodel.coefs_[0].flatten()
+        Norder = np.argsort(-abs(Nweight))
+        Nname = features[Norder]
+        Nweight = np.round(Nweight[Norder],3)
         
         if(gender%2==0):
-            print(features)
-            print(Mrank)
+            Mrank+=cal_rank(features,Nname)
+        else:
+            Frank+=cal_rank(features,Nname)
+        show_graph(Nname,Nweight,"Neural-network-Classifier")
+        
+        if(gender%2==0):
             order = np.argsort(Mrank)
             print(features[order])
             print(Mrank[order])
         else:
-            print(features)
-            print(Frank)
             order = np.argsort(Frank)
             print(features[order])
             print(Frank[order])
