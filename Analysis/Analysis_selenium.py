@@ -201,9 +201,10 @@ Male_data_norm = data_norm(Male_data)
 Female_data_norm = data_norm(Female_data)
 
 # 주요요인 추출
-Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
-Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
-
+Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
+Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
+#Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
+#Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
 # 데이터 가중치 확인하기
 
 def Confirm_feature_weight(table,result):
@@ -269,17 +270,17 @@ def Confirm_feature_weight(table,result):
 
 #print("============================남자경기요인============================")
 #Confirm_feature_weight(Male_data_norm,Mplayoff)
-Confirm_feature_weight(Male_data,Mplayoff)
+#Confirm_feature_weight(Male_data,Mplayoff)
 #Confirm_feature_weight(Extract_M_Data,Mplayoff)        
 #print("============================여자경기요인============================")
 #Confirm_feature_weight(Female_data_norm,Fplayoff)
-Confirm_feature_weight(Female_data,Fplayoff)
+#Confirm_feature_weight(Female_data,Fplayoff)
 #Confirm_feature_weight(Extract_M_Data,Mplayoff)        
 
-#Male_data['플레이오프진출'] = Mplayoff
-#Female_data['플레이오프진출'] = Fplayoff
-#Extract_M_Data['플레이오프진출'] = Mplayoff
-#Extract_F_Data['플레이오프진출'] = Fplayoff
+Male_data['플레이오프진출'] = Mplayoff
+Female_data['플레이오프진출'] = Fplayoff
+Extract_M_Data['플레이오프진출'] = Mplayoff
+Extract_F_Data['플레이오프진출'] = Fplayoff
 
 ##print(Extract_M_Data.columns)
 ##print(Extract_F_Data.columns)
@@ -287,5 +288,5 @@ Confirm_feature_weight(Female_data,Fplayoff)
 ## pickle로 변환한다.
 #Male_data.to_pickle("Male_data")
 #Female_data.to_pickle("Female_data")
-#Extract_M_Data.to_pickle("Extract_M_Data")
-#Extract_F_Data.to_pickle("Extract_F_Data")
+Extract_M_Data.to_pickle("Extract_M_Data")
+Extract_F_Data.to_pickle("Extract_F_Data")
