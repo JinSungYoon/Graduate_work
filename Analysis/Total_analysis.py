@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+#from sklearn.model_selection import train_test_split
 import matplotlib as mpl
 import matplotlib.pylab as plt
 
@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import GradientBoostingClassifier
+#from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neural_network import MLPClassifier
 
 # 한글 폰트 안 깨지기 위한 import
@@ -115,12 +115,12 @@ for loop in range(5):
         # To use a coef_ function you must use linear kernel.
         Smodel = SVC(C=1.0,kernel="linear",gamma="auto",decision_function_shape="ovo")
         Smodel.fit(X_train,y_train)
+        
         """
         # GradientBoosting 데이터 훈련작업
         Gmodel = GradientBoostingClassifier()
         Gmodel = Gmodel.fit(X_train,y_train)
-        """
-        
+        """      
         
         if(gender%2==0):
             print("******************************Results of men's professional team playoffs******************************")
@@ -275,7 +275,6 @@ for loop in range(5):
         else:
             Frank+=cal_rank(features,Rname)
         show_graph(Rname,Rweight,"Random-Forest-Classifier",gender)
-
         
         print("*** Variable weigt(SVM) ***")
         Sorder = np.argsort(-abs(Smodel.coef_))
