@@ -93,7 +93,19 @@ for year in range(syear,18):
     
     Male_attack_efficiency =  ((kovo_Mresult_table[('공격', '성공')]-kovo_Mresult_table[('공격', '공격차단')]-kovo_Mresult_table[('공격', '범실')])/kovo_Mresult_table[('공격', '시도')])*100
     Female_attack_efficiency = ((kovo_Fresult_table[('공격', '성공')]-kovo_Fresult_table[('공격', '공격차단')]-kovo_Fresult_table[('공격', '범실')])/kovo_Fresult_table[('공격', '시도')])*100
-    
+    Male_open_attack_efficiency =  ((kovo_Mresult_table[('오픈공격', '성공')]-kovo_Mresult_table[('오픈공격', '공격차단')]-kovo_Mresult_table[('오픈공격', '범실')])/kovo_Mresult_table[('오픈공격', '시도')])*100
+    Female_open_attack_efficiency =  ((kovo_Fresult_table[('오픈공격', '성공')]-kovo_Fresult_table[('오픈공격', '공격차단')]-kovo_Fresult_table[('오픈공격', '범실')])/kovo_Fresult_table[('오픈공격', '시도')])*100
+    Male_time_attack_efficiency =  ((kovo_Mresult_table[('시간차공격', '성공')]-kovo_Mresult_table[('시간차공격', '공격차단')]-kovo_Mresult_table[('시간차공격', '범실')])/kovo_Mresult_table[('시간차공격', '시도')])*100
+    Female_time_attack_efficiency = ((kovo_Fresult_table[('시간차공격', '성공')]-kovo_Fresult_table[('시간차공격', '공격차단')]-kovo_Fresult_table[('시간차공격', '범실')])/kovo_Fresult_table[('시간차공격', '시도')])*100
+    Male_moving_attack_efficiency =  ((kovo_Mresult_table[('이동공격', '성공')]-kovo_Mresult_table[('이동공격', '공격차단')]-kovo_Mresult_table[('이동공격', '범실')])/kovo_Mresult_table[('이동공격', '시도')])*100
+    Female_moving_attack_efficiency = ((kovo_Fresult_table[('이동공격', '성공')]-kovo_Fresult_table[('이동공격', '공격차단')]-kovo_Fresult_table[('이동공격', '범실')])/kovo_Fresult_table[('이동공격', '시도')])*100
+    Male_back_attack_efficiency =  ((kovo_Mresult_table[('후위공격', '성공')]-kovo_Mresult_table[('후위공격', '공격차단')]-kovo_Mresult_table[('후위공격', '범실')])/kovo_Mresult_table[('후위공격', '시도')])*100
+    Female_back_attack_efficiency = ((kovo_Fresult_table[('후위공격', '성공')]-kovo_Fresult_table[('후위공격', '공격차단')]-kovo_Fresult_table[('후위공격', '범실')])/kovo_Fresult_table[('후위공격', '시도')])*100
+    Male_quick_attack_efficiency =  ((kovo_Mresult_table[('속공', '성공')]-kovo_Mresult_table[('속공', '공격차단')]-kovo_Mresult_table[('속공', '범실')])/kovo_Mresult_table[('속공', '시도')])*100
+    Female_quick_attack_efficiency = ((kovo_Fresult_table[('속공', '성공')]-kovo_Fresult_table[('속공', '공격차단')]-kovo_Fresult_table[('속공', '범실')])/kovo_Fresult_table[('속공', '시도')])*100
+    Male_quick_open_efficiency =  ((kovo_Mresult_table[('퀵오픈', '성공')]-kovo_Mresult_table[('퀵오픈', '공격차단')]-kovo_Mresult_table[('퀵오픈', '범실')])/kovo_Mresult_table[('퀵오픈', '시도')])*100
+    Female_quick_open_efficiency = ((kovo_Fresult_table[('퀵오픈', '성공')]-kovo_Fresult_table[('퀵오픈', '공격차단')]-kovo_Fresult_table[('퀵오픈', '범실')])/kovo_Fresult_table[('퀵오픈', '시도')])*100
+        
     import Analysis_practice as As
     
     # 임시로 플레이오프 진출한 팀에 대한 내용을 추가했다.
@@ -120,13 +132,26 @@ for year in range(syear,18):
     # 공격 효율이라는 항목을 추가하므로 공격파트에 추가를 해줘야 보기 편하기에 삽입하였다.
     kovo_Mresult_table.insert(loc=16,column="공격_효율",value=Male_attack_efficiency)
     kovo_Fresult_table.insert(loc=16,column="공격_효율",value=Female_attack_efficiency)
+    kovo_Mresult_table.insert(loc=22,column="오픈공격_효율",value=Male_open_attack_efficiency)
+    kovo_Fresult_table.insert(loc=22,column="오픈공격_효율",value=Female_open_attack_efficiency)
+    kovo_Mresult_table.insert(loc=28,column="시간차공격_효율",value=Male_time_attack_efficiency)
+    kovo_Fresult_table.insert(loc=28,column="시간차공격_효율",value=Female_time_attack_efficiency)
+#    NaN값이 많아서 추가하지 않았다.
+#    kovo_Mresult_table.insert(loc=34,column="이동공격_효율",value=Male_moving_attack_efficiency)
+#    kovo_Fresult_table.insert(loc=34,column="이동공격_효율",value=Female_moving_attack_efficiency)
+    kovo_Mresult_table.insert(loc=39,column="후위공격_효율",value=Male_back_attack_efficiency)
+    kovo_Fresult_table.insert(loc=39,column="후위공격_효율",value=Female_back_attack_efficiency)
+    kovo_Mresult_table.insert(loc=45,column="속공_효율",value=Male_quick_attack_efficiency)
+    kovo_Fresult_table.insert(loc=45,column="속공_효율",value=Female_quick_attack_efficiency)
+    kovo_Mresult_table.insert(loc=51,column="퀵오픈_효율",value=Male_quick_open_efficiency)
+    kovo_Fresult_table.insert(loc=51,column="퀵오픈_효율",value=Female_quick_open_efficiency)
     kovo_Mresult_table["최다연승"] = Male_win_score
     kovo_Mresult_table["최다연패"] = Male_lose_score   
     kovo_Fresult_table["최다연승"] = Female_win_score
     kovo_Fresult_table["최다연패"] = Female_lose_score
     kovo_Mresult_table["플레이오프진출"] = Male_play_off
     kovo_Fresult_table["플레이오프진출"] = Female_play_off
-    
+        
     if year<=10:
         del kovo_Mresult_table["승률"]
         del kovo_Fresult_table["승률"]
@@ -174,13 +199,12 @@ def change_name(table):
         if len(table.columns[loop])==2:
             # 득점,벌칙,범실은 2개가 겹치므로 하나만 넣어준다.
             if (table.columns[loop][-1]=='득점' and table.columns[loop][-2]=='득점') or (table.columns[loop][-1]=='벌칙' and table.columns[loop][-2]=='벌칙') or (table.columns[loop][-1]=='범실' and table.columns[loop][-2]=='범실'):
-                Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]},inplace='True')
-                Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]},inplace='True')
+                table.rename(columns={table.columns[loop]:table.columns[loop][-2]},inplace='True')
             else:
-                Male_data.rename(columns={Male_data.columns[loop]:Male_data.columns[loop][-2]+'_'+Male_data.columns[loop][-1]},inplace='True')
-                Female_data.rename(columns={Female_data.columns[loop]:Female_data.columns[loop][-2]+'_'+Female_data.columns[loop][-1]},inplace='True')
+                table.rename(columns={table.columns[loop]:table.columns[loop][-2]+'_'+table.columns[loop][-1]},inplace='True')
 
 change_name(Male_data)
+change_name(Female_data)
 
 delete_feature(Male_data,'벌칙')
 delete_feature(Female_data,'벌칙')
@@ -201,12 +225,90 @@ Male_data_norm = data_norm(Male_data)
 Female_data_norm = data_norm(Female_data)
 
 # 주요요인 추출
-Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
-Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확','최다연승','최다연패']]
-#Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
-#Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
-#Extract_M_Data = Male_data_norm[['오픈공격_시도','오픈공격_범실','오픈공격_공격차단','오픈공격_성공','시간차공격_시도','시간차공격_범실','시간차공격_공격차단','시간차공격_성공','후위공격_시도','후위공격_범실','후위공격_공격차단','후위공격_성공','속공_시도','속공_범실','속공_공격차단','속공_성공','퀵오픈_시도','퀵오픈_범실','퀵오픈_공격차단','퀵오픈_성공','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
-#Extract_F_Data = Female_data_norm[['오픈공격_시도','오픈공격_범실','오픈공격_공격차단','오픈공격_성공','시간차공격_시도','시간차공격_범실','시간차공격_공격차단','시간차공격_성공','후위공격_시도','후위공격_범실','후위공격_공격차단','후위공격_성공','속공_시도','속공_범실','속공_공격차단','속공_성공','퀵오픈_시도','퀵오픈_범실','퀵오픈_공격차단','퀵오픈_성공','블로킹_시도','블로킹_실패','블로킹_성공','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
+# 전체경기요인
+#Extract_M_Data = Male_data_norm[['득점_공격', '득점_블로킹', '득점_서브', '득점', '공격_시도', '공격_성공', '공격_공격차단', '공격_범실',
+#       '공격_성공률','오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실',
+#       '오픈공격_성공률', '시간차공격_시도', '시간차공격_성공', '시간차공격_공격차단', '시간차공격_범실',
+#       '시간차공격_성공률', '이동공격_시도', '이동공격_성공', '이동공격_공격차단', '이동공격_범실', '이동공격_성공률',
+#       '후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실', '후위공격_성공률', '속공_시도',
+#       '속공_성공', '속공_공격차단', '속공_범실', '속공_성공률', '퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단',
+#       '퀵오픈_범실', '퀵오픈_성공률', '서브_시도', '서브_성공', '서브_범실', '서브_세트당평균', '블로킹_시도',
+#       '블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트', '블로킹_세트당평균',
+#       '디그_시도', '디그_성공', '디그_실패', '디그_범실', '디그_세트당평균', '세트_시도', '세트_성공',
+#       '세트_범실', '세트_세트당평균', '리시브_시도', '리시브_정확', '리시브_범실', '리시브_세트당평균', '범실']]
+#Extract_F_Data = Female_data_norm[['득점_공격', '득점_블로킹', '득점_서브', '득점', '공격_시도', '공격_성공', '공격_공격차단', '공격_범실',
+#       '공격_성공률','오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실',
+#       '오픈공격_성공률', '시간차공격_시도', '시간차공격_성공', '시간차공격_공격차단', '시간차공격_범실',
+#       '시간차공격_성공률', '이동공격_시도', '이동공격_성공', '이동공격_공격차단', '이동공격_범실', '이동공격_성공률',
+#       '후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실', '후위공격_성공률', '속공_시도',
+#       '속공_성공', '속공_공격차단', '속공_범실', '속공_성공률', '퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단',
+#       '퀵오픈_범실', '퀵오픈_성공률', '서브_시도', '서브_성공', '서브_범실', '서브_세트당평균', '블로킹_시도',
+#       '블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트', '블로킹_세트당평균',
+#       '디그_시도', '디그_성공', '디그_실패', '디그_범실', '디그_세트당평균', '세트_시도', '세트_성공',
+#       '세트_범실', '세트_세트당평균', '리시브_시도', '리시브_정확', '리시브_범실', '리시브_세트당평균', '범실']]
+# 공격파트
+#Extract_M_Data = Male_data_norm[['공격_시도', '공격_성공', '공격_공격차단', '공격_범실']]
+#Extract_F_Data = Female_data_norm[['공격_시도', '공격_성공', '공격_공격차단', '공격_범실']]
+# 오픈공격파트
+#Extract_M_Data = Male_data_norm[['오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실']]
+#Extract_F_Data = Female_data_norm[['오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실']]
+# 시간차공격
+#Extract_M_Data = Male_data_norm[['시간차공격_시도', '시간차공격_성공', '시간차공격_공격차단', '시간차공격_범실']]
+#Extract_F_Data = Female_data_norm[['시간차공격_시도', '시간차공격_성공', '시간차공격_공격차단', '시간차공격_범실']]
+# 이동공격
+#Extract_M_Data = Male_data_norm[['이동공격_시도', '이동공격_성공', '이동공격_공격차단', '이동공격_범실']]
+#Extract_F_Data = Female_data_norm[['이동공격_시도', '이동공격_성공', '이동공격_공격차단', '이동공격_범실']]
+# 후위공격
+#Extract_M_Data = Male_data_norm[['후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실']]
+#Extract_F_Data = Female_data_norm[['후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실']]
+# 속공
+#Extract_M_Data = Male_data_norm[['속공_시도','속공_성공', '속공_공격차단', '속공_범실']]
+#Extract_F_Data = Female_data_norm[['속공_시도','속공_성공', '속공_공격차단', '속공_범실']]
+# 퀵오픈
+#Extract_M_Data = Male_data_norm[['퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단','퀵오픈_범실']]
+#Extract_F_Data = Female_data_norm[['퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단','퀵오픈_범실']]
+# 서브
+#Extract_M_Data = Male_data_norm[['서브_시도', '서브_성공', '서브_범실']]
+#Extract_F_Data = Female_data_norm[['서브_시도', '서브_성공', '서브_범실']]
+# 블로킹
+#Extract_M_Data = Male_data_norm[['블로킹_시도','블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트']]
+#Extract_F_Data = Female_data_norm[['블로킹_시도','블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트']]
+# 디그
+#Extract_M_Data = Male_data_norm[['디그_시도', '디그_성공', '디그_실패', '디그_범실']]
+#Extract_F_Data = Female_data_norm[['디그_시도', '디그_성공', '디그_실패', '디그_범실']]
+# 세트
+#Extract_M_Data = Male_data_norm[['세트_시도', '세트_성공','세트_범실']]
+#Extract_F_Data = Female_data_norm[['세트_시도', '세트_성공','세트_범실']]
+# 리시브
+#Extract_M_Data = Male_data_norm[['리시브_시도', '리시브_정확', '리시브_범실']]
+#Extract_F_Data = Female_data_norm[['리시브_시도', '리시브_정확', '리시브_범실']]
+# 공격 + 블로킹 + 서브 + 세트  +리시브 + 최다연승 + 최다연패
+#Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_성공','블로킹_실패','블로킹_범실','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확','최다연패','최다연승']]
+#Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','공격_효율','블로킹_시도','블로킹_성공','블로킹_실패','블로킹_범실','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확','최다연패','최다연승']]
+
+# 상위 3개 요인 남자(후위공격/공격/오픈공격 : 12개) 여자(오픈공격/공격/리시브 : 11개)
+#Extract_M_Data = Male_data_norm[['공격_시도', '공격_성공', '공격_공격차단', '공격_범실','오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실','후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실']]
+#Extract_F_Data = Female_data_norm[['공격_시도', '공격_성공', '공격_공격차단', '공격_범실','오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실','리시브_시도', '리시브_정확', '리시브_범실']]
+
+# 공격 + 블로킹 + 서브 + 세트 + 리시브
+#Extract_M_Data = Male_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','블로킹_시도','블로킹_성공','블로킹_실패','블로킹_범실','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
+#Extract_F_Data = Female_data_norm[['공격_시도','공격_범실','공격_공격차단','공격_성공','블로킹_시도','블로킹_성공','블로킹_실패','블로킹_범실','서브_시도','서브_범실','서브_성공','세트_시도','세트_범실','세트_성공','리시브_시도','리시브_범실','리시브_정확']]
+
+# 하위 4개 요인 제거
+#Extract_M_Data = Male_data_norm[['득점', '공격_시도', '공격_성공', '공격_공격차단', '공격_범실',
+#       '공격_성공률','오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실',
+#       '오픈공격_성공률', '후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실', '후위공격_성공률', '속공_시도',
+#       '속공_성공', '속공_공격차단', '속공_범실', '속공_성공률', '퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단',
+#       '퀵오픈_범실', '퀵오픈_성공률', '서브_시도', '서브_성공', '서브_범실', '서브_세트당평균', '블로킹_시도',
+#       '블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트', '블로킹_세트당평균',
+#       '세트_시도', '세트_성공','세트_범실', '세트_세트당평균',]]
+#Extract_F_Data = Female_data_norm[['득점', '공격_시도', '공격_성공', '공격_공격차단', '공격_범실',
+#       '공격_성공률','오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실',
+#       '오픈공격_성공률', '시간차공격_시도', '시간차공격_성공', '시간차공격_공격차단', '시간차공격_범실',
+#       '시간차공격_성공률','후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실', '후위공격_성공률', '속공_시도',
+#       '퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단','퀵오픈_범실', '퀵오픈_성공률', '블로킹_시도',
+#       '블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트', '블로킹_세트당평균',
+#       '세트_시도', '세트_성공','세트_범실', '세트_세트당평균', '리시브_시도', '리시브_정확', '리시브_범실', '리시브_세트당평균', '범실']]
 
 # 데이터 가중치 확인하기
 
@@ -287,11 +389,11 @@ Extract_F_Data['플레이오프진출'] = Fplayoff
 
 ##print(Extract_M_Data.columns)
 ##print(Extract_F_Data.columns)
-print(Male_data.columns)
-print(len(Male_data.columns))
 
 ## pickle로 변환한다.
 #Male_data.to_pickle("Male_data")
 #Female_data.to_pickle("Female_data")
 Extract_M_Data.to_pickle("Extract_M_Data")
 Extract_F_Data.to_pickle("Extract_F_Data")
+#Extract_M_Data.to_pickle("original_M_Data")
+#Extract_F_Data.to_pickle("original_F_Data")

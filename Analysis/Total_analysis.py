@@ -42,7 +42,7 @@ def show_graph(x,y,tech,g):
     plt.show()
     
 def cal_rank(origin,order):
-    rank_score = np.zeros(len(origin))
+    rank_score = [0 for i in range(len(origin))]
     for index in range(len(origin)):
         for loop in range(len(order)):
             if(origin[index]==order[loop]):
@@ -50,11 +50,14 @@ def cal_rank(origin,order):
                 break
     return rank_score
 
-Mrank = np.zeros(19)
-Frank = np.zeros(19)
+Mrank = np.zeros(41)
+Frank = np.zeros(43)
+
+Mranklog = []
+Franklog = []
+
 Macc = [[]*1 for i in range(10)]
 Facc = [[]*1 for i in range(10)]
-
 
 for loop in range(5):
     for gender in range(2):
@@ -102,7 +105,7 @@ for loop in range(5):
         Lmodel = Lmodel.fit(X_train,y_train)
         
         # Neural Network 데이터 훈련
-        Nmodel = MLPClassifier(hidden_layer_sizes=(1,),activation='logistic',solver='lbfgs')
+        Nmodel = MLPClassifier(hidden_layer_sizes=(1,),activation='logistic',solver='lbfgs',alpha=0.0001)
         Nmodel = Nmodel.fit(X_train,y_train)
         
         # Randomforest 데이터 훈련작업
@@ -230,13 +233,12 @@ for loop in range(5):
         Dweight = np.round(Dweight[Dorder],3)
         if(gender%2==0):
             Mrank+=cal_rank(features,Dname)
+            Mranklog.append(cal_rank(features,Dname))
         else:
             Frank+=cal_rank(features,Dname)
+            Franklog.append(cal_rank(features,Dname))
         show_graph(Dname,Dweight,"Decision-Tree",gender)
         
-#        for i in range(len(features)):
-#            print("{} : {}".format(Dname[i],Dweight[i]))
-#
         
         print("*** Variable weight(LR) ***")
         Lorder = np.argsort(-abs(Lmodel.coef_))
@@ -249,8 +251,10 @@ for loop in range(5):
         Lweight = np.round(Lweight[0],3)
         if(gender%2==0):
             Mrank+=cal_rank(features,Lname)
+            Mranklog.append(cal_rank(features,Lname))
         else:
             Frank+=cal_rank(features,Lname)
+            Franklog.append(cal_rank(features,Lname))
         show_graph(Lname,Lweight,"Logistic-regression",gender)
         
         print("*** Variable weight(NN) ***")
@@ -261,8 +265,10 @@ for loop in range(5):
         
         if(gender%2==0):
             Mrank+=cal_rank(features,Nname)
+            Mranklog.append(cal_rank(features,Nname))
         else:
             Frank+=cal_rank(features,Nname)
+            Franklog.append(cal_rank(features,Nname))
         show_graph(Nname,Nweight,"Neural-network-Classifier",gender)
                            
         print("*** Variable weight(RF) ***")
@@ -272,8 +278,10 @@ for loop in range(5):
         Rweight = np.round(Rweight[Rorder],3)
         if(gender%2==0):
             Mrank+=cal_rank(features,Rname)
+            Mranklog.append(cal_rank(features,Rname))
         else:
             Frank+=cal_rank(features,Rname)
+            Franklog.append(cal_rank(features,Rname))
         show_graph(Rname,Rweight,"Random-Forest-Classifier",gender)
         
         print("*** Variable weigt(SVM) ***")
@@ -284,8 +292,10 @@ for loop in range(5):
         Sname = Sname[0]
         if(gender%2==0):
             Mrank+=cal_rank(features,Sname)
+            Mranklog.append(cal_rank(features,Sname))
         else:
             Frank+=cal_rank(features,Sname)
+            Franklog.append(cal_rank(features,Sname))
         show_graph(Sname,Sweight,"Support-vector-machine",gender)
         """
         print("*** Variable weight(GB) ***")
@@ -307,25 +317,55 @@ for loop in range(5):
         else:
             order = np.argsort(Frank)
             print(features[order])
-            print(Frank[order])
-        
+            print(Frank[order])       
+
+Mdata = pd.read_pickle("E:/대학교/졸업/졸업작품/분석연습/Extract_M_Data")
+Fdata = pd.read_pickle("E:/대학교/졸업/졸업작품/분석연습/Extract_F_Data")
+Mfeatures = Mdata.columns
+Ffeatures = Fdata.columns
 
 print("*******************최종 플레이오프 진출 기여도가 높은 순서*******************")
 Morder = np.argsort(-Mrank)
-print(features[Morder])
+print(Morder)
+print(Mfeatures[Morder])
 print(Mrank[Morder])
-show_graph(features[Morder],Mrank[Morder],"5가지 모델",0)
+print(Mfeatures)
+print(cal_rank(Mfeatures,Mfeatures[Morder]))
+show_graph(Mfeatures[Morder],Mrank[Morder],"5가지 모델",0)
 
 Forder = np.argsort(-Frank)
-print(features[Forder])
+print(Forder)
+print(Ffeatures[Forder])
 print(Frank[Forder])
-show_graph(features[Forder],Frank[Forder],"5가지 모델",1)
+print(Ffeatures)
+print(cal_rank(Ffeatures,Ffeatures[Forder]))
+show_graph(Ffeatures[Forder],Frank[Forder],"5가지 모델",1)
 
 print("각 모델에 대한 평균 예측률")
-#print(Macc)
-#print(Facc)
 print(np.mean(Macc,axis=1))
 print(np.mean(Facc,axis=1))
+
+print("전체 모델에 대한 평균 예측률")
+
+def cal_mean(table):
+    train=[]
+    test=[]
+    for it in range(len(table)):
+        if(it%2==0):
+            train.append(table[it])
+        else:
+            test.append(table[it])
+    print("훈련모델의 평균정확도:{:0.2f}".format(np.mean(train)))
+    print("검정모델의 평균정확도:{:0.2f}".format(np.mean(test)))
+
+cal_mean(Macc)
+cal_mean(Facc)    
+
+#print("Male")
+#print(Mranklog)
+#print("Female")
+#print(Franklog)
+
 # 참고한 사이트
 # Logistic_regression
 #       https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
