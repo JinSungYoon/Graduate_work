@@ -50,8 +50,8 @@ def cal_rank(origin,order):
                 break
     return rank_score
 
-Mrank = np.zeros(41)
-Frank = np.zeros(43)
+Mrank = np.zeros(16)
+Frank = np.zeros(16)
 
 Mranklog = []
 Franklog = []
@@ -238,7 +238,6 @@ for loop in range(5):
             Frank+=cal_rank(features,Dname)
             Franklog.append(cal_rank(features,Dname))
         show_graph(Dname,Dweight,"Decision-Tree",gender)
-        
         
         print("*** Variable weight(LR) ***")
         Lorder = np.argsort(-abs(Lmodel.coef_))
