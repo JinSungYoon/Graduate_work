@@ -1,13 +1,13 @@
 from selenium import webdriver as wd
 import pandas as pd
-import numpy as np
+
 
 # Chrome의 경우 다운 받은 chromedriver의 위치를 지정해 준다.
 driver = wd.Chrome(executable_path='E:/대학교/졸업/졸업작품/웹크롤링/Web_Crawler(SKtechx Tacademy)/Chromedriver.exe')
 
 # 암묵적으로 웹 자원 로드를 위해 3초를 기다려 준다.
 driver.implicitly_wait(3)
-"""
+
 # Kovo 사이트 url에 접근한다.
 driver.get("http://www.kovo.co.kr/main.asp")
 
@@ -23,7 +23,9 @@ driver.find_element_by_link_text('팀 순위').click()
 # find_element_by_class_name이랑 css.selector로 안 되서 xpath로 했음
 driver.find_element_by_xpath("//a[@class='selectBox selectbox_custom w228 selectBox-dropdown']").click()
 
-driver.find_element_by_link_text('NH농협 2011-2012 V-리그').click()
+year = 12 
+
+driver.find_element_by_link_text('NH농협 20%s-20%s V-리그'%(str(year),str(year+1))).click()
 
 # 여자부를 클릭한다
 #driver.find_element_by_link_text('여자부').click()
@@ -71,7 +73,11 @@ for loop in range(len(Result_table_text)):
             if index>5:
                 Result_table_text[loop][index] = float(Result_table_text[loop][index])
             else:
-                Result_table_text[loop][index] = int(Result_table_text[loop][index])
+                # 10년 이전에는 승점대신에 승률을 사용했기 때문에 int형이 아닌 float형을 사용한다.
+                if year<=10 and index==3:
+                    Result_table_text[loop][index] = float(Result_table_text[loop][index])
+                else:
+                    Result_table_text[loop][index] = int(Result_table_text[loop][index])
 
 for loop in range(len(Part_table_text)):
     for index in range(len(Part_table_text[loop])):
@@ -104,17 +110,18 @@ for index in range(1,len(Part_list)):
     item.click()
 
     # 암묵적으로 웹 자원 로드를 위해 1000초를 기다려 준다.(기다리지 않으면 제대로 로드 되지 않아 데이터가 없다는 에러가 자주 뜬다...)
-    driver.implicitly_wait(1000)
-                
-    # 공격 파트에 table의 text 접근
+    driver.implicitly_wait(10000)
+    
     item_table_mass = driver.find_element_by_id('tab1_%s'%(index+1)).text
+    
+#  만일 웹 자원이 로드되지 않아 해당 데이터를 긁어오지 못했을 경우 다시 기다려서 데이터를 긁어온다.
+    while(len(item_table_mass)==0):
+        driver.implicitly_wait(10000)
+        item_table_mass = driver.find_element_by_id('tab1_%s'%(index+1)).text
     
     # text를 줄 바꿈 기준으로 분할
     item_table_mass = item_table_mass.splitlines()
-
-#    인덱스 에러떠서 임시적으로 해놓은 코든이니 문제 발생이 생기지 않으면 살포시 지우세요 ㅎㅎㅎ    
-#    print(len(item_table_mass))
-    
+        
     # 테이블의 columns값을 따로 추출
     item_list_text = item_table_mass[0] 
     
@@ -174,14 +181,15 @@ for index in range(1,len(Part_list)):
     #        http://nittaku.tistory.com/121
     
     Result_table = pd.merge(Result_table,item_table,left_index=True,right_index=True)
-    
-Result_table.to_pickle('Kovo_Male_result_table(11-12)')
-#Result_table.to_pickle('Kovo_Female_result_table(11-12)')
+
+
+Result_table.to_pickle('Kovo_Male_result_table(%s-%s)'%(str(year),str(year+1)))
+#Result_table.to_pickle('Kovo_Female_result_table(%s-%s)'%(str(year),str(year+1)))
 #Part_table.to_pickle('Kovo_part_table')
-"""
+
 
 # =================================================== 최대 연속승 최대 연속패를 추출하기 위한 역대 전적 크롤링 ======================================================================================
-
+"""
 # Kovo 사이트 url에 접근한다.
 driver.get("http://www.kovo.co.kr/main.asp")
 
@@ -192,26 +200,27 @@ driver.find_element_by_class_name('t_nav4').click()
 driver.find_element_by_link_text('역대기록').click()
 
 # 여자부를 클릭한다
-#driver.find_element_by_link_text('여자부').click()
+driver.find_element_by_link_text('여자부').click()
 
-num = 12
+num = 2009
 
-for year in range(num,10,-1):
+for year in range(num,2007,-1):
 
     if year != 17:
         # 16년도 시즌 이전에는
         driver.find_elements_by_xpath("//a[@class='selectBox selectbox_custom w286 selectBox-dropdown']")[0].click()
-    
-        driver.find_elements_by_link_text("NH농협 20%s-20%s V-리그"%(str(year),str(year+1)))[0].click()
+        
+        driver.find_elements_by_link_text("NH농협 %s-%s V-리그"%(str(year),str(year+1)))[0].click()
         
         driver.implicitly_wait(10)
         
         driver.find_elements_by_xpath("//a[@class='selectBox selectbox_custom w286 selectBox-dropdown']")[1].click()
-
-        driver.find_elements_by_link_text("NH농협 20%s-20%s V-리그"%(str(year),str(year+1)))[1].click()   
+       
+        driver.find_elements_by_link_text("NH농협 %s-%s V-리그"%(str(year),str(year+1)))[1].click()   
+        
     
     # 잠시 30초 쉰다
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(30)
     
     # 라운드를 바꾸는 두번째 select-box를 클릭한다.
     driver.find_elements_by_xpath("//a[@class='selectBox selectbox_custom w123 selectBox-dropdown']")[1].click()
@@ -251,8 +260,13 @@ for year in range(num,10,-1):
         del table[loop][2:7]    
     # 앞에 개행단위 때문에 생성된 리스트를 제거한다.
     del table[0:2]
-    
+                        
+#    for loop in range(len(table[63])-1):
+#        table[63].pop(0)
+#        table[64].pop(0)
+        
     # 시즌 데이터를 테이블로 만듭니다.
     Season_result = pd.DataFrame(table,columns=table_columns)
     # 시즌 데이터를 pickle 파일로 만든다.
     Season_result.to_pickle('Female_season(%s-%s)'%(year,year+1))
+"""

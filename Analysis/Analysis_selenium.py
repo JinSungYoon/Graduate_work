@@ -18,6 +18,26 @@ mpl.rc('font',family=font_name)
 count = 10
 # 시작 년도
 syear = 8
+
+
+def data_norm(table):
+    col = table.columns
+    
+    # 데이터 정규화 과정
+    x = table[col].values
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x.astype(float))
+    table = pd.DataFrame(x_scaled,
+                         columns=col,
+                         index=table.index)
+    return table
+
+def convert_negative(table,name):
+    for loop  in range(0,len(table.columns)):
+        if len(table.columns[loop])==2:
+            if(table.columns[loop][-1]==name):
+                table[table.columns[loop]] = table[table.columns[loop]]*-1
+
 # =====================================================================7년치 시즌 데이터 ===================================================================
 
 # 플레이오프 진출 요인들 담을 리스트
@@ -138,7 +158,7 @@ for year in range(syear,18):
             Female_play_off.append(1)
         else:
             Female_play_off.append(0)
-    
+        
     # 공격 효율이라는 항목을 추가하므로 공격파트에 추가를 해줘야 보기 편하기에 삽입하였다.
     kovo_Mresult_table.insert(loc=16,column="공격_효율",value=Male_attack_efficiency)
     kovo_Fresult_table.insert(loc=16,column="공격_효율",value=Female_attack_efficiency)
@@ -180,6 +200,16 @@ for year in range(syear,18):
         del kovo_Mresult_table["승점"]
         del kovo_Fresult_table["승점"]
     
+    # 해당 데이터에서 낮으면 긍정적인 값들을 음수값으로 변경해준다.
+    convert_negative(kovo_Mresult_table,'공격차단')
+    convert_negative(kovo_Fresult_table,'공격차단')
+    convert_negative(kovo_Mresult_table,'범실')
+    convert_negative(kovo_Fresult_table,'범실')
+    convert_negative(kovo_Mresult_table,'실패')
+    convert_negative(kovo_Fresult_table,'실패')
+    convert_negative(kovo_Mresult_table,'최다연패')
+    convert_negative(kovo_Fresult_table,'최다연패')
+    
     Mdata.append(kovo_Mresult_table)
     Fdata.append(kovo_Fresult_table)
     
@@ -209,11 +239,6 @@ delete_feature(Female_data,'세트득실률')
 delete_feature(Male_data,'점수득실률')
 delete_feature(Female_data,'점수득실률')
 
-Mplayoff = Male_data['플레이오프진출']
-del Male_data['플레이오프진출']
-Fplayoff = Female_data['플레이오프진출']
-del Female_data['플레이오프진출']
-
 def change_name(table):
     for loop in range(0,len(table.columns)):
         # 튜플로 된 이름들은 길이가 2이므로
@@ -224,24 +249,23 @@ def change_name(table):
             else:
                 table.rename(columns={table.columns[loop]:table.columns[loop][-2]+'_'+table.columns[loop][-1]},inplace='True')
 
+
 change_name(Male_data)
 change_name(Female_data)
 
 delete_feature(Male_data,'벌칙')
 delete_feature(Female_data,'벌칙')
 
-def data_norm(table):
-    col = table.columns
-    
-    # 데이터 정규화 과정
-    x = table[col].values
-    min_max_scaler = preprocessing.MinMaxScaler()
-    x_scaled = min_max_scaler.fit_transform(x.astype(float))
-    table = pd.DataFrame(x_scaled,
-                         columns=col,
-                         index=table.index)
-    return table
+# 임시로 엑셀파일을 만들어 둔다
+#Male_data.to_excel('male.xlsx')
+#Female_data.to_excel('female.xlsx')
 
+Mplayoff = Male_data['플레이오프진출']
+del Male_data['플레이오프진출']
+Fplayoff = Female_data['플레이오프진출']
+del Female_data['플레이오프진출']
+
+# 전체 데이터를 정규화 한다.(전체 데이터를 다 받고 정규화)
 Male_data_norm = data_norm(Male_data)
 Female_data_norm = data_norm(Female_data)
 
@@ -329,12 +353,12 @@ Female_data_norm = data_norm(Female_data)
 #                                   '리시브_시도', '리시브_정확', '리시브_범실','리시브_효율']]
 
 # 배구 5개 요인 남자(오픈공격/블로킹/서브/리시브/세트) 여자(오픈공격/블로킹/서브/리시브.세트)
-#Extract_M_Data = Male_data_norm[['오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실','오픈공격_성공률', '오픈공격_효율',
+#Extract_M_Data = Male_data_norm[['공격_시도', '공격_성공', '공격_공격차단', '공격_범실','공격_성공률', '공격_효율',
 #                                 '블로킹_시도','블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트','블로킹_효율',
 #                                 '서브_시도', '서브_성공', '서브_범실','서브_효율',
 #                                 '세트_시도','세트_성공','세트_범실','세트_효율',
 #                                 '리시브_시도', '리시브_정확', '리시브_범실','리시브_효율','최다연승','최다연패']]
-#Extract_F_Data = Female_data_norm[['오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실','오픈공격_성공률','오픈공격_효율',
+#Extract_F_Data = Female_data_norm[['공격_시도', '공격_성공', '공격_공격차단', '공격_범실','공격_성공률', '공격_효율',
 #                                 '블로킹_시도','블로킹_성공', '블로킹_유효블락', '블로킹_실패', '블로킹_범실', '블로킹_어시스트','블로킹_효율',
 #                                 '서브_시도', '서브_성공', '서브_범실','서브_효율',
 #                                 '세트_시도','세트_성공','세트_범실','세트_효율',
@@ -342,10 +366,14 @@ Female_data_norm = data_norm(Female_data)
 
 # 남녀부문 파트별 중요 3요인 남:오픈공격/서브/세트/최다연승/최다연패 여:오픈공격/세트/리시브/최다연승/최다연패
 Extract_M_Data = Male_data_norm[['오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실','오픈공격_성공률', '오픈공격_효율',
+#                                '공격_시도', '공격_성공', '공격_공격차단', '공격_범실','공격_성공률', '공격_효율',
                                  '서브_시도', '서브_성공', '서브_범실','서브_효율',
                                  '세트_시도','세트_성공','세트_범실','세트_효율',
                                  '최다연승','최다연패']]
-Extract_F_Data = Female_data_norm[['오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실','오픈공격_성공률','오픈공격_효율',
+Extract_F_Data = Female_data_norm[[#'공격_시도', '공격_성공', '공격_공격차단', '공격_범실','공격_성공률', '공격_효율',
+#                                 '오픈공격_시도', '오픈공격_성공', '오픈공격_공격차단', '오픈공격_범실','오픈공격_성공률', '오픈공격_효율',
+                                 '후위공격_시도', '후위공격_성공', '후위공격_공격차단', '후위공격_범실','후위공격_성공률', '후위공격_효율',
+                                 #'퀵오픈_시도', '퀵오픈_성공', '퀵오픈_공격차단','퀵오픈_범실','퀵오픈_성공률','퀵오픈_효율',
                                  '세트_시도','세트_성공','세트_범실','세트_효율',
                                  '리시브_시도', '리시브_정확', '리시브_범실','리시브_효율',
                                  '최다연승','최다연패']]
@@ -447,7 +475,6 @@ Extract_F_Data['플레이오프진출'] = Fplayoff
 ##print(Extract_M_Data.columns)
 ##print(Extract_F_Data.columns)
 
-#print(Extract_M_Data[Extract_M_Data=='NaN'])
 
 ## pickle로 변환한다.
 #Male_data.to_pickle("Male_data")
