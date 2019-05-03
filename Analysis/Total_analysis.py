@@ -11,6 +11,10 @@ from sklearn.ensemble import RandomForestClassifier
 #from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neural_network import MLPClassifier
 
+# p value와 critical value를 위해서
+import math
+from scipy.stats import t
+
 # 한글 폰트 안 깨지기 위한 import
 import matplotlib.font_manager as fm
 
@@ -50,8 +54,8 @@ def cal_rank(origin,order):
                 break
     return rank_score
 
-Mrank = np.zeros(16)
-Frank = np.zeros(16)
+#Mrank = np.zeros(27)
+#Frank = np.zeros(27)
 
 Mranklog = []
 Franklog = []
@@ -63,10 +67,10 @@ for loop in range(5):
     for gender in range(2):
         if gender%2==0:
             Data = pd.read_pickle("E:/대학교/졸업/졸업작품/분석연습/Extract_M_Data")
-#            Data = pd.read_pickle("Male_data")
+            Mrank = np.zeros(len(Data.columns)-1)
         else:
             Data = pd.read_pickle("E:/대학교/졸업/졸업작품/분석연습/Extract_F_Data")
-#            Data = pd.read_pickle("Female_data")
+            Frank = np.zeros(len(Data.columns)-1)
                     
         # 플레이오프 진출 여부 columns와 결정요소들을 분리한다.
         Y = Data["플레이오프진출"]
@@ -354,16 +358,54 @@ def cal_mean(table):
             train.append(table[it])
         else:
             test.append(table[it])
-    print("훈련모델의 평균정확도:{:0.2f}".format(np.mean(train)))
-    print("검정모델의 평균정확도:{:0.2f}".format(np.mean(test)))
+    print("훈련모델의 평균정확도:{:0.3f}".format(np.mean(train)))
+    print("검정모델의 평균정확도:{:0.3f}".format(np.mean(test)))
 
 cal_mean(Macc)
 cal_mean(Facc)    
 
-#print("Male")
-#print(Mranklog)
-#print("Female")
-#print(Franklog)
+def cal_avg(arr):
+    rank = np.zeros(len(arr[0]))
+    for loop in range(len(arr)):
+        for it in range(len(arr[loop])):
+            rank[it]+=arr[loop][it]
+    return rank/len(arr)
+
+def cal_var(total,avg):
+    var = np.zeros(len(total[0]))
+    for loop in range(len(total)):
+        for it in range(len(total[loop])):
+            var[it]+=math.pow(total[loop][it]-avg[it],2)
+    return var/(len(total)-1)
+
+def cal_std(var,n):
+    return np.sqrt(var/(n-1))
+
+def independent_ttest(data1,data2,alpha):
+    # calculate mean
+    mean1,mean2 = cal_avg(data1),cal_avg(data2)
+    # calculate variance
+    var1,var2 = cal_var(data1,mean1),cal_var(data2,mean2)
+    # calculate standard deviation
+    std1,std2 = cal_std(var1,len(data1)),cal_std(var2,len(data2))
+    # calculate standard deviation error
+    se1,se2 = std1/np.sqrt(len(data1)),std2/np.sqrt(len(data2))
+    # standard error on the difference between the samples
+    sed = np.sqrt(se1**2.0 + se2**2.0)
+    # calculate the t statistic
+    t_stat = (mean1-mean2)/sed
+    # degrees of freedom
+    df = len(data1)+len(data2)-2
+    # calculate the critical value
+    cv = t.ppf(1.0 - alpha,df)
+    # cal culate the p-value
+    p = (1.0 - t.cdf(abs(t_stat),df))*2.0
+    return t_stat,df,cv,p
+
+t_stat,df,cv,p = independent_ttest(Mranklog,Franklog,0.05)
+
+print(abs(t_stat)<=cv)
+print(p>0.05)
 
 # 참고한 사이트
 # Logistic_regression
